@@ -1,57 +1,100 @@
-$Id: README,v 1.4 2009/07/23 03:51:56 russoz Exp $
-
 README
+==============================================================================
 
 Welcome to NiceBashing!
 
 NiceBashing, or nb for short, is a framework for sharing bash libraries of
 functions, aliases, variables, etc..
 
-It also provides some libraries out of the box, such as ssh, net, bash (itself)
-for starters. Users can control which libraries to load within a simple file in
+It also provides some libraries out of the box, such as ssh, net, for
+starters. Users can control which libraries to load within a simple file in
 their home directories. Users can also load their own shell libraries.
 
 The package is can install itself with a simple command.
 
-Quick Guide
+
+QUICK GUIDE
+==============================================================================
 
 Untar the contents of the package in a temporary directory, then:
 
-$ <tmpdir>/sbin/nb-setup
+    $ <tmpdir>/sbin/nb-setup
 
 It will install itself in the ~/.nb directory, and it will add a line invoking
 itself to your ~/.bashrc or ~/.profile file.
 
-Open a new shell and enjoy :-) You can set/unset your configurations by editing
-the ~/.nb/user/conf file.
+Open a new shell and enjoy :-) You can set/unset your configurations by 
+editing the ~/.nb/conf/user.conf file. As a suggestion, make it a copy of
+defaults.conf to start with, and then tailor it to your own taste.
 
-Write your own script libraries!
+Whenever you have access to a new system, just add it to the NB peer list:
+
+    $ nb_peer_add <hostname>
+
+And, whenever you change a setting, or update NB, or add a new module to your
+local system, you can keep your all accounts in all your peers in synch, by
+issuing the following command:
+
+    $ nb_sync
+
+Note: NiceBashing requires rsync in both ends to perform this synchronization.
+
+
+CONFIGURATION
+==============================================================================
+
+The following configuration files are read by NiceBashing, in the order below,
+and the order reflects the priority os the files. Defaults are overridden by
+Os-specific settings, which are overridden by user settings and then by
+local settings.
+
+    NB_DEFAULTS:  $NB_HOME/conf/defaults.conf
+        Default configuration file. hold the default values for all settings.
+        Although users are allowed to modify it, they are strongly encouraged
+        to add custom settings to the user.conf file (described below).
+        (Synchronized to all peers)
+
+    NB_OSCONF:    $NB_HOME/conf/$(uname).conf
+        If the user needs some configurations to be specific to a certain
+        operating system, like Linux or AIX, put these settings in a file
+        named after the output of the uname command.
+        (Synchronized to all peers, but only meaningful for the specific OS)
+
+    NB_USERCONF:  $NB_HOME/conf/user.conf
+        This is the where the user configurations should go.
+        (Synchronized to all peers)
+        
+    NB_LOCALCONF: $NB_HOME/conf/local.conf
+        Thse configurations are strictly local to the system where it exists.
+        (Not synchronized to all peers)
+
+
+DEVELOPING YOUR SCRIPT LIBRARY
+==============================================================================
 
 Rules || Conventions:
 
 * Every library file in NB has a name like nb-<libname>
-
+* User libraries should be placed into $NB_HOME/user
 * You can always count on the variables:
+  - NB_HOME:      ($HOME/.nb)                   installation directory of NB
+  - NB_DEFAULTS:  ($NB_HOME/conf/defaults.conf) default config file
+  - NB_OSCONF:    ($NB_HOME/conf/$(uname).conf) OS-specific config file
+  - NB_USERCONF:  ($NB_HOME/conf/user.conf)     user config file
+  - NB_LOCALCONF: ($NB_HOME/conf/local.conf)    local config file
 
-  - NB_HOME:     ($HOME/.nb)              installation directory of NB
-  - NB_DEFAULTS: ($NB_HOME/base/defaults) default config file
-  - NB_USERCONF: ($NB_HOME/user/conf)     user config file
+  Check more at $NB_HOME/load.var
 
 * Copy $NB_HOME/skel/nb-skel to $NB_HOME/user/nb-<libname>
-
 * The function names are like <libname>-<function-name>, for example:
-
-    The nb-ssh file contains the following functions:
-    
+  - The nb-ssh file contains the following functions:
       ssh-setup
       ssh-load-keys
-	
-    except for:
-	
-      - The functions defined in $NB_HOME/load are named nb_<something>, mostly 
-        because they are too low-level in NB, like system calls to an OS, and 
-        $NB_HOME/load may be run from a /bin/sh, and it seems old sh does not 
-        accept function names with dashes
+  - This rules applies to all modules except for:
+      - The functions defined in $NB_HOME/load are named nb_<something>,
+        mostly because they are too low-level in NB, like system calls to an
+        OS, and $NB_HOME/load may be run from a /bin/sh, and it seems old sh
+        does not accept function names with dashes
       - The functions defined in the core modules, i.e. modules in the
         $NB_HOME/nbcore directory, which refer to common and somewhat
         unrelated tasks, thus no point in calling them common-this or
@@ -62,13 +105,10 @@ Rules || Conventions:
 
 * Functions names should always be lower-case, and compound names should be 
   compound-names, dash-separated. Like all-lower-dash-sep-grinder, got-it?
-
 * You may have external programs/scripts installed in $NB_HOME/bin, using the
   same naming convention of functions, and then add wrapper functions around
   them. As a matter of fact, there's a function wrap-bin() defined in 
   nb-common which will create a wrapper function for you.
-
 * Parameterize all external binaries in variables
-
-* Review everything for security flaws and scripts best practices (sanely, pls)
+* Review everything for security flaws and bash best practices
 
