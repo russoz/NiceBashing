@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+#
+# $Id: prop-set-value,v 1.2 2008/10/02 03:05:13 russoz Exp $
+#
+
+use strict;
+use warnings;
+use File::Copy;
+
+sub usage {
+    die 'usage: prop-set-value <file> <property> <value>';
+}
+
+####################################################################
+
+usage if $#ARGV != 2;
+my $file  = shift;
+my $prop  = shift;
+my $value = shift;
+my $i     = 0;
+
+my $filenew = $file . '.new';
+my $fileold = $file . '.old';
+
+open STDIN,  "<", $file    || die "Cannot open $file";
+open STDOUT, ">", $filenew || die "Cannot open $filenew";
+
+while (<>) {
+    chomp;
+    if (/^\s*$prop\s*\=/) {
+        s/=.*$/=$value/;
+        $i++;
+    }
+    print "$_\n";
+}
+
+print "$prop=$value\n" if $i == 0;
+close STDIN;
+close STDOUT;
+
+copy( $file, $fileold ) && copy( $filenew, $file ) && unlink($filenew);
+
+# signal if found more than one instance
+exit 2 if $i > 1;
+
+exit 0;
+

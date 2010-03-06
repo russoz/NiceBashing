@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# $Id: make-package,v 1.5 2009/10/29 04:11:14 russoz Exp $
+#
+# Alexei Znamensky <russoz@user.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+usage() {
+  echo "usage: make-package <version number>" >&2
+}
+
+version="$1"
+shift
+[ -z "$version" ] && { usage; exit 1; }
+
+TMPDIR=~/tmp/nb.make-package.$version
+CVSROOT=":extssh:russoz@nicebashing.cvs.sf.net:/cvsroot/nicebashing"
+export CVSROOT
+
+d=${0%/*}
+here=$(echo $d | grep -qv ^/ && d=$( cd $(pwd)/${d}; pwd ); echo $d)
+echo "here=$here" >&2
+echo "TMPDIR=$TMPDIR" >&2
+
+cd ${here}/../..
+
+{
+  echo "Removing edit backups..."
+  find nb/ -name *~ -print | xargs -r rm
+} && {
+  echo "Updating..."
+  cvs -q update nb
+
+#echo "Checking for differences..."
+#cvs -q diff --brief -N nb ||
+#	{ echo "This workspace must be synchronized with the repository!!" >&2
+#		exit 1; }
+
+} && {
+  echo "Tagging..."
+  cvs -q tag -R -F "v$version" 
+} && {
+  echo "Commiting tags..."
+  cvs -q commit -m "Release: $version" -f nb
+} && {
+  echo "Exporting..."
+  [[ -d "$TMPDIR" ]] && rm -rf "$TMPDIR"
+  mkdir -p "$TMPDIR"
+  ( cd "$TMPDIR" 
+    cvs -q export -r "v$version" nb )
+} && {
+  echo "Removing dev tree..."
+  rm -rf $TMPDIR/dev
+} && {
+  echo "Packaging..."
+  mv $TMPDIR/nb $TMPDIR/nb-${version}
+  tar czf $TMPDIR/nb-${version}.tar.gz -C $TMPDIR nb-${version}
+} && {
+  mv $TMPDIR/nb-${version}.tar.gz ~/
+  ls -l ~/nb-${version}.tar.gz
+}
+

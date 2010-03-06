@@ -1,0 +1,20 @@
+#
+# $Id: load.var,v 1.4 2009/10/20 18:13:06 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+NB_CORE=${NB_HOME}/nbcore
+NB_BASE=${NB_HOME}/base
+NB_USER=${NB_HOME}/user
+NB_DEFAULTS="${NB_HOME}/conf/defaults.conf"
+NB_OSCONF="${NB_HOME}/conf/$(uname).conf"
+NB_USERCONF="${NB_HOME}/conf/user.conf"
+NB_LOCALCONF="${NB_HOME}/conf/local.conf"
+export NB_HOME NB_BASE NB_USER NB_DEFAULTS NB_USERCONF NB_LOCALCONF
+
+NB_VAR_PREFIX="__nb"
+NB_STACKTRACE="1"
+

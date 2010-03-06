@@ -1,0 +1,132 @@
+#!/bin/bash -e 'echo Do not run this >&2; exit 1'
+#
+# $Id: nb-sync,v 1.3 2009/10/20 17:42:46 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+[[ -n "${_NB_SYNC}" ]] && return
+_NB_SYNC='$Id: nb-sync,v 1.3 2009/10/20 17:42:46 russoz Exp $'
+nb_vecho $_NB_SYNC
+
+NB_SYNC_PEERS=$(nb_get sync_peers_file)
+NB_SYNC_OTHER=$(nb_get sync_other_files)
+
+_sync-is-file-known() {
+  local file="$1"
+  grep -q "$file" ${NB_SYNC_OTHER} 2>/dev/null
+}
+
+_sync-file-add() {
+  local file="$1"
+  _sync-is-file-known "$file" && return 0
+  echo "$file" >> ${NB_SYNC_OTHER}
+}
+
+_sync-file() {
+  [[ -z "$1" ]] && return 1
+  [[ -s $(nb_get sync_other_files) ]] \
+    && ${NB_HOME}/sbin/sync-other "${NB_HOME}" "${1}"
+}
+
+_sync-is-peer-known() {
+  local peer="$1"
+  grep -q "$peer" ${NB_SYNC_PEERS} 2>/dev/null
+}
+
+_sync-peer-add() {
+  local peer="$1"
+  _sync-is-peer-known "$peer" && return 0
+  echo "$peer" >> ${NB_SYNC_PEERS}
+}
+
+_sync-remove-peer() {
+  local peer="$1"
+  local escaped=$(echo "$peer" | perl -lpe 's|\.|\\\.|')
+  perl -i.bak -nle "print unless /$escaped/" ${NB_SYNC_PEERS} >/dev/null 2>&1
+}
+
+_sync-peer() {
+  [[ -z "$1" ]] && return 1
+  # sync NB files
+  ${NB_HOME}/sbin/copy-nb ${NB_HOME} ${1}:.nb 1
+  # sync user-specified files
+  _sync-file "${1}"
+}
+
+nb_sync() {
+  local p
+
+  [[ -n "$1" ]] && {
+    p="$1"
+
+    _sync-is-peer-known ${p} || {
+      nb_echo "Warning: ${p} is unknown to NB. Add it with nb_add_host"
+      return 1
+    }
+    _sync-peer ${p}
+  }
+  
+  [[ ! -s ${NB_SYNC_PEERS} ]] && return 0
+
+  if [[ "$(nb_get sync_parallel)" == "1" ]]; then
+    # parallel
+    for peer in $(cat $NB_SYNC_PEERS); do
+      # using eval to actually expand ${peer} *before* going to background
+      eval "_sync-peer ${peer} &"
+      sleep 1
+    done
+    wait
+  else
+    # sequential
+    for peer in $(cat $NB_SYNC_PEERS); do
+      _sync-peer ${peer}
+    done
+    wait
+  fi
+}
+
+nb_peer_add() {
+  local p
+  
+  for p in "$@"; do
+    _sync-peer-add "$p"
+  done
+  
+  for p in "$@"; do
+    ${NB_HOME}/sbin/nb-setup -y -r "${p}"
+    
+    # sync user-specified files
+    _sync-file "${p}"
+  done
+}
+
+nb_peer_list() {
+  [[ "$1" != "-q" ]] && nb_echo "============== Peers"
+  cat ${NB_SYNC_PEERS} >&2
+  [[ "$1" != "-q" ]] && nb_echo "=============="
+}
+
+nb_file_add() {
+  local f
+  for f in "$@"; do
+    _sync-file-add "$f"
+  done
+}
+
+nb_file_list() {
+  [[ "$1" != "-q" ]] && nb_echo "============== Other Files"
+  cat ${NB_SYNC_OTHER} >&2
+  [[ "$1" != "-q" ]] && nb_echo "=============="
+}
+
+#############################################################################
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:

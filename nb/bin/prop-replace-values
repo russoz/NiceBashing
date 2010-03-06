@@ -1,0 +1,110 @@
+#!/usr/bin/perl -w
+#
+#  $Id: prop-replace-values,v 1.2 2008/10/02 03:05:13 russoz Exp $
+#
+
+use strict;
+use warnings;
+use Getopt::Std;
+
+my %mask;
+
+sub debug {
+    my $line  = shift;
+    my $DEBUG = 0;
+    chomp $line;
+    print STDERR "$line\n" if $DEBUG;
+}
+
+#
+# Prints usage and dies
+#
+sub usageAndDie {
+    my $msg = shift;
+    warn $msg if $msg;
+    die
+'usage: prop-replace-value [-n] -m <maskFile> [-i <inputFile>] [-o <outputFile>]';
+}
+
+#
+# loadMaskFile
+#
+# Loads the content of the mask file to a hash
+#
+sub loadMaskFile {
+    my $maskFile = shift;
+    my $m;
+
+    open MASK, "<", "$maskFile";
+
+    while ( $m = <MASK> ) {
+        chomp $m;
+        next if $m =~ /^\s*\#/;
+        next if $m =~ /^\s*$/;
+
+        if ( $m =~ /^\s*(\w+)\s*=\s*(\S+)\s*$/ ) {
+
+            # populate the entry in the %mask hash
+            $mask{$1} = $2;
+            debug("new mask entry: mask{$1}=$2\n");
+        }
+    }
+
+    close MASK;
+}
+
+#
+# processFile
+#
+sub processFile {
+    my $key;
+
+    while (<>) {
+        chomp;
+        debug($_);
+        if (/^\s*(\w+)\s*=/) {
+            $key = $1;
+            if ( exists $mask{$key} ) {
+                print "$key=$mask{$key}\n";
+                debug("substituted mask{$key}");
+            }
+            else {
+                print "$_\n";
+            }
+        }
+        else {
+            print "$_\n";
+        }
+    }
+}
+
+#############################################################################
+
+# options in the command line
+our ( $opt_m, $opt_i, $opt_o, $opt_n );
+
+# get command line arguments
+getopts("nm:i:o:");
+
+# validation
+usageAndDie("Cannot read mask file: $opt_m") unless -r $opt_m;
+usageAndDie("Cannot read input file: $opt_i") if $opt_i && !-r $opt_i;
+
+# friendly messages
+print STDERR "FAKE RUN: " if $opt_n;
+print STDERR "prop-replace-value:\ninput =";
+print STDERR $opt_i ? "$opt_i" : "STDIN";
+print STDERR "\noutput=";
+print STDERR $opt_o ? "$opt_o" : "STDOUT";
+print STDERR "\nmask  =$opt_m\n";
+exit 1 if $opt_n;
+
+# basic setup
+open STDIN,  "<", $opt_i if $opt_i;
+open STDOUT, ">", $opt_o if $opt_o;
+
+# load the mask file
+loadMaskFile($opt_m);
+
+processFile();
+

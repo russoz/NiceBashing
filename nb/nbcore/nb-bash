@@ -1,0 +1,45 @@
+#!/bin/bash -e 'echo Do not run this >&2; exit 1'
+#
+# $Id: nb-bash,v 1.5 2009/10/20 17:33:38 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+[[ -n "${_NB_BASH}" ]] && return 0
+_NB_BASH='$Id: nb-bash,v 1.5 2009/10/20 17:33:38 russoz Exp $'
+nb_vecho $_NB_BASH
+
+#############################################################################
+
+bash-is-interactive() {
+  [[ -n "$PS1" ]]
+}
+
+if bash-is-interactive; then
+
+  nb_is_true bash_set_prompt \
+    && eval "PS1='$(nb_get bash_prompt) '"
+
+  shopt -s checkwinsize
+  export HISTCONTROL=erasedups
+
+  # enable bash completion in interactive shells
+  # bash_completion may return false when sourcing, which will cause errors
+  nb_is_true bash_completion \
+    && [[ -r /etc/bash_completion ]] && nb_load_file /etc/bash_completion \
+      || return 0
+
+  case $(nb_get edit_mode) in
+    emacs) set -o emacs ;;
+    vi)    set -o vi    ;;
+  esac
+fi
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:

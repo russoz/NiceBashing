@@ -1,0 +1,45 @@
+#!/bin/sh -e 'echo Do not run this >&2; exit 1'
+#
+# $Id: nb-term,v 1.6 2009/10/11 12:23:05 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net> 
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+[[ -n "${_NB_TERM}" ]] && return
+_NB_TERM='$Id: nb-term,v 1.6 2009/10/11 12:23:05 russoz Exp $'
+nb_vecho $_NB_TERM
+
+# functions here
+
+term-set-title() {
+  echo -ne "\e]0;${@}\a"
+}
+
+term-windowed-terminal() {
+  case "$TERM" in
+    xterm|rxvt) return 0 ;;
+    linux) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+bash-is-interactive && nb_is_true term_set_xterm_title \
+  && term-windowed-terminal \
+  && eval "PS1='\[$(term-set-title $(nb_get term_xterm_title) )\]$PS1'"
+
+if [[ "$TERM" == "cygwin" ]]; then
+  TERM="ansi"
+fi
+
+#############################################################################
+
+# aliases and one-time runs here
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:

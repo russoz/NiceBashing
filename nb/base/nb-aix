@@ -1,0 +1,79 @@
+#!/bin/bash -e 'echo Do not run this >&2; exit 1'
+#
+# $Id: nb-aix,v 1.5 2009/10/11 12:46:10 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net> 
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+[[ -n "${_NB_AIX}" ]] && return
+_NB_AIX='$Id: nb-aix,v 1.5 2009/10/11 12:46:10 russoz Exp $'
+nb_vecho $_NB_AIX
+
+[[ $(uname) = "AIX" ]] || {
+  nb_vecho "nb-aix: Not on an AIX system!"
+  return 1
+}
+
+# functions here
+
+aix-clear-unsuccessful-logins() {
+  id="$1"
+  [[ -z "$id" ]] && return
+
+  sudo chuser unsuccessful_login_count=0 $id
+}
+
+aix-is-apar-installed() {
+	/usr/sbin/instfix -i -v -k "$1"
+}
+
+smit() {
+  sudo -H /usr/bin/smit "$@"
+}
+
+smitty() {
+  sudo -H /usr/bin/smitty "$@"
+}
+
+install_rpm() {
+  local name="$1"
+  local url="$2"
+
+  [[ -z "$name" || -z "$url" ]] && {
+    echo "usage: install_rpm <name> <url>" >&2
+    return 1
+  }
+
+  echo -n "$name ..."
+  rpm -Uvh "$url"
+  echo "DONE"
+}
+
+#############################################################################
+
+# aliases and one-time runs here
+
+[[ -d /opt/freeware/bin ]] && prepend-path /opt/freeware/bin
+
+{
+  local java_bin
+  java_bin=$(nb_path_chooser bin/java $(nb_get aix_java_search_path))
+  [[ -n "$java_bin" ]] && {
+    append-path $java_bin
+    JAVA_HOME=${java_bin%/*}
+    export JAVA_HOME
+    nb_vecho "nb-aix: Choosing JAVA_HOME=${JAVA_HOME}"
+  }
+}
+
+alias df="df -k"
+alias du="du -k"
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:

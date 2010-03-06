@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#
+# $Id: configure-load,v 1.2 2009/08/06 07:54:34 russoz Exp $
+#
+# Alexei Znamensky <russoz@user.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+msg() {
+  echo "$@" >&2
+}
+
+normalize_dir() {
+  perl -MCwd=abs_path -le 'print abs_path(shift)' "$@"
+}
+
+##############################################################################
+
+nbhome_dir="$1"
+
+[[ -z "$nbhome_dir" ]] && {
+  msg "usage: ${0##*/} <NB home dir>";
+  exit 1
+}
+
+nbhome_dir=$(normalize_dir ${nbhome_dir})
+
+msg "Configuring NB load script"
+perl -i -pe 's|=.*$|='"${nbhome_dir}"'| if /^NB_HOME=/' ${nbhome_dir}/load || {
+  msg "*** ${0##*/}: Cannot set the NB_HOME directory in ${nbhome_dir}/load"
+  exit 1
+}
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:
+

@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+#
+# $Id: prop-is-defined,v 1.2 2008/10/02 03:05:13 russoz Exp $
+#
+
+use strict;
+use warnings;
+
+sub usage {
+    die 'usage: prop-is-defined <file> <property>';
+}
+
+####################################################################
+
+my $file = shift || usage();
+my $prop = shift || usage();
+my $i    = 0;
+
+open STDIN, "<", "$file" || die "Cannot open $file";
+
+while (<>) {
+    chomp;
+    if (/^\s*$prop\s*\=/) {
+        $i++;
+    }
+}
+
+close STDIN;
+
+# signal if none was found
+exit 1 if $i == 0;
+
+# signal if found more than one instance
+exit 2 if $i > 1;
+
+exit 0;
+

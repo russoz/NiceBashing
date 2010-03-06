@@ -1,0 +1,74 @@
+$Id: README,v 1.4 2009/07/23 03:51:56 russoz Exp $
+
+README
+
+Welcome to NiceBashing!
+
+NiceBashing, or nb for short, is a framework for sharing bash libraries of
+functions, aliases, variables, etc..
+
+It also provides some libraries out of the box, such as ssh, net, bash (itself)
+for starters. Users can control which libraries to load within a simple file in
+their home directories. Users can also load their own shell libraries.
+
+The package is can install itself with a simple command.
+
+Quick Guide
+
+Untar the contents of the package in a temporary directory, then:
+
+$ <tmpdir>/sbin/nb-setup
+
+It will install itself in the ~/.nb directory, and it will add a line invoking
+itself to your ~/.bashrc or ~/.profile file.
+
+Open a new shell and enjoy :-) You can set/unset your configurations by editing
+the ~/.nb/user/conf file.
+
+Write your own script libraries!
+
+Rules || Conventions:
+
+* Every library file in NB has a name like nb-<libname>
+
+* You can always count on the variables:
+
+  - NB_HOME:     ($HOME/.nb)              installation directory of NB
+  - NB_DEFAULTS: ($NB_HOME/base/defaults) default config file
+  - NB_USERCONF: ($NB_HOME/user/conf)     user config file
+
+* Copy $NB_HOME/skel/nb-skel to $NB_HOME/user/nb-<libname>
+
+* The function names are like <libname>-<function-name>, for example:
+
+    The nb-ssh file contains the following functions:
+    
+      ssh-setup
+      ssh-load-keys
+	
+    except for:
+	
+      - The functions defined in $NB_HOME/load are named nb_<something>, mostly 
+        because they are too low-level in NB, like system calls to an OS, and 
+        $NB_HOME/load may be run from a /bin/sh, and it seems old sh does not 
+        accept function names with dashes
+      - The functions defined in the core modules, i.e. modules in the
+        $NB_HOME/nbcore directory, which refer to common and somewhat
+        unrelated tasks, thus no point in calling them common-this or
+        common-that.
+      - Functions that override existing commands, like ssh, scp and sftp in
+        nb-ssh, which obviously must have the same names of the ones they're
+        overriding.
+
+* Functions names should always be lower-case, and compound names should be 
+  compound-names, dash-separated. Like all-lower-dash-sep-grinder, got-it?
+
+* You may have external programs/scripts installed in $NB_HOME/bin, using the
+  same naming convention of functions, and then add wrapper functions around
+  them. As a matter of fact, there's a function wrap-bin() defined in 
+  nb-common which will create a wrapper function for you.
+
+* Parameterize all external binaries in variables
+
+* Review everything for security flaws and scripts best practices (sanely, pls)
+

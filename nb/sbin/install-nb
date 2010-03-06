@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+#
+# $Id: install-nb,v 1.4 2009/10/06 23:42:38 russoz Exp $
+#
+# Alexei Znamensky <russoz@user.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+nb_src="$1"
+nb_dst="$2"
+
+dir=${0%/*}
+
+${dir}/copy-nb ${nb_src} ${nb_dst} && {
+  ${dir}/configure-profile ${nb_dst} ${HOME}/.bashrc \
+    || ${dir}/configure-profile ${nb_dst} ${HOME}/.profile
+}
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:
+

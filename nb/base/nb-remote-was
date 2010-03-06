@@ -1,0 +1,59 @@
+#!/bin/bash -e 'echo Do not run this >&2; exit 1'
+#
+# $Id: nb-remote-was,v 1.4 2009/10/11 12:24:15 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net> 
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+[[ -n "${_NB_REMOTE_WAS}" ]] && return
+_NB_REMOTE_WAS='$Id: nb-remote-was,v 1.4 2009/10/11 12:24:15 russoz Exp $'
+nb_vecho $_NB_REMOTE_WAS
+
+# functions here
+
+remote-was-tail-system-out() {
+  local SERVER REMDIR F FILE
+	SERVER="$1"
+	REMDIR="$2"
+	F="$3"
+	FILE=${F:-SystemOut.log}
+	remote-tail-file ${SERVER} ${REMDIR} ${FILE}
+}
+
+remote-was-tail-system-err() {
+  local SERVER REMDIR F FILE
+	SERVER="$1"
+	REMDIR="$2"
+	F="$3"
+	FILE=${F:-SystemErr.log}
+	remote-tail-file ${SERVER} ${REMDIR} ${FILE}
+}
+
+remote-was-fetch-logs() {
+  local SERVER REMDIR DATESPEC FILEDATE
+	SERVER="$1"
+	REMDIR="$2"
+	DATESPEC="$3"
+
+	if test -z "$DATESPEC" || _compareDateSpec "today" "$DATESPEC"; then
+		remote-fetch-files ${SERVER} ${REMDIR} 'SystemErr.log'
+		remote-fetch-files ${SERVER} ${REMDIR} 'SystemOut.log'
+	else
+		FILEDATE=_$(date -d "$DATESPEC" +%y.%m.%d)_
+		remote-fetch-files ${SERVER} ${REMDIR} "SystemErr${FILEDATE}*.log"
+		remote-fetch-files ${SERVER} ${REMDIR} "SystemOut${FILEDATE}*.log"
+	fi
+}
+
+#############################################################################
+
+# aliases and one-time runs here
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:

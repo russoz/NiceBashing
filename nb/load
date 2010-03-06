@@ -1,0 +1,354 @@
+#!/bin/sh -e 'echo Do not run this >&2; exit 1'
+#
+# $Id: load,v 1.24 2009/11/05 02:48:27 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+#
+# This script may be run in Bourne shell, thus restrictions may apply.
+# Do not use bash-isms here.
+#
+
+#
+# BASH CHECK
+#
+# if there is a bash available, but we're not using it, change to it
+if [ "${BASH##*/}" != "bash" ]; then
+  bash_err_not_found=127
+  bash_err_no_exec=126
+
+  NB_SEARCH_BASH="/bin /usr/bin /usr/local/bin /opt/freeware/bin"
+  for p in $NB_SEARCH_BASH; do
+    [ -x "$p/bash" ] && NB_S="$p/bash" && break
+  done
+
+  # Cannot find bash
+  if [ -z "$NB_S" ]; then
+    [ -n "$PS1" ] && echo "No bash :(" >&2
+    return $bash_err_not_found
+  fi
+
+  oldshell="$SHELL"
+  SHELL="$NB_S"
+  export SHELL
+  [ -n "$PS1" ] && echo "Changing SHELL: $oldshell -> $SHELL" >&2
+  exec $SHELL -l || return $bash_err_no_exec
+fi
+# No need to unset the variables above
+
+#
+# BASH FROM NOW ON
+#
+
+# Checking bash version
+[[ "${BASH_VERSINFO[0]}" -lt '3' ]] && {
+  echo "Your bash is too old for nb [$BASH_VERSION]" >&2
+  return 1
+}
+#[[ "${BASH_VERSINFO[1]}" -lt '2' ]] && {
+#  echo "Your bash is too old for nb [$BASH_VERSION]" >&2
+#  return 1
+#}
+
+set +o posix
+set +o history
+
+##############################################################################
+
+NB_HOME=${NB_HOME:=${HOME}/.nb}
+. ${NB_HOME}/load.var
+
+##############################################################################
+
+## CRITICAL SECTION: reading config files
+
+##############################################################################
+
+#
+# _nb_sep
+#
+# Prints a separation line
+#
+_nb_sep() {
+  echo "=== NB ==============================================================="
+}
+
+#
+# nb_fatal
+#
+# Prints fatal error message
+#
+# As this function may be called before initializing the NB variables
+# the nb_echo function CAN NOT be used to print messages.
+#
+nb_fatal() {
+  _nb_sep >&2
+  echo "FATAL ERROR:" "$@" >&2
+
+  if [[ "$NB_STACKTRACE" == "1" ]]; then
+    # starts on #1 to avoid printing itself
+    local i=1
+    while [[ "$i" -lt "${#FUNCNAME[*]}" ]]; do
+      echo "  ${BASH_SOURCE[$i]}::${FUNCNAME[$i]}(${BASH_LINENO[$i]})"
+      i=$((i+1))
+    done
+    _nb_sep
+  fi >&2
+
+  return 1
+}
+
+#
+# nb_set
+#
+# Sets a NB variable
+#
+nb_set() {
+  eval "export ${NB_VAR_PREFIX}_${1}=${2}"
+}
+
+#
+# nb_get
+#
+# Gets the value of a NB variable
+#
+nb_get() {
+  eval "echo \$${NB_VAR_PREFIX}_$1"
+}
+
+#
+# nb_is_true
+#
+nb_is_true() {
+  [ "$(nb_get $1)" == "1" ] 
+}
+
+#
+# nb_load_settings
+#
+# Load configuration parameters
+#
+nb_load_settings() {
+  local f=${1}
+  local key val
+  
+  local skip="^[:space:]*(#.*)?$"
+  local match="^([^[:space:]]+)[:space:]+(.*)$"
+  
+  while read -r line; do
+    {
+      echo "$line" | perl -nle '
+        s|^\s*||;
+        exit 1 if /^(#.*)?$/;
+        if( ! /^\S+\s+\S.*$/ ) {
+          exit 1
+        }' || continue
+    }
+    # Skip empty and comment-lines
+    #echo "$line" | grep -E -q -c '^ *(#.*)?$' && continue
+    #[[ "$line" =~ $skip ]] && continue
+
+    # Check syntax
+    #[[ "$line" =~ $match ]] || {
+    #    echo "Cannot parse file [${f}]:" >&2;
+    #    echo "[$line]" >&2;
+    #    return 1
+    #};
+
+    # Parse
+    key="$(echo "$line" | awk '{ print $1 }')"
+    val="$(echo "$line" | perl -pe 's|^\S+\s+||; s|\s*||')"
+    
+    # Set variable
+    nb_set "$key" "$val"
+  done <${f}
+}
+
+#
+# nb_path_chooser
+#
+# usage: path_chooser file path1 [path2 [path3 [...]]]
+#
+nb_path_chooser() {
+  local p
+  local F="${1%/}"
+  shift
+
+  for p in "$@"; do
+    [[ -r "$p/$F" ]] && { echo "$p/$F"; return 0; }
+  done
+  return 1
+}
+
+#
+# nb_echo
+#
+nb_echo() {
+  echo "$@"
+}
+
+#
+# nb_vecho
+#
+nb_vecho() {
+  [[ -z "${PS1}" ]] && return 0  # non-interactive shell
+  nb_is_true verbose || return 0
+  nb_echo "$@"
+}
+
+# load settings (default)
+[[ ! -r "${NB_DEFAULTS}" ]] && {
+  nb_fatal "Cannot find configuration file: ${NB_DEFAULTS}"
+  return 1
+}
+
+nb_load_settings "${NB_DEFAULTS}" || return 1
+
+# load settings (Operating System)
+[[ -r "${NB_OSCONF}"    ]] && nb_load_settings "${NB_OSCONF}"
+
+# load settings (user)
+[[ -r "${NB_USERCONF}"  ]] && nb_load_settings "${NB_USERCONF}"
+
+# load settings (local)
+[[ -r "${NB_LOCALCONF}" ]] && nb_load_settings "${NB_LOCALCONF}"
+
+##############################################################################
+
+## END OF CRITICAL SECTION (configuration files have been read)
+
+##############################################################################
+
+#
+# nb_die
+#
+# Prints fatal error message and exits
+#
+# WARNING: This function will call "exit", which will terminate the calling
+#          script. This behaviour is usually not intended for scripts being
+#          source'd from .profile, so use it with care!!!
+#
+nb_die() {
+  nb_fatal "$@"
+  exit 1
+}
+
+#
+# _nb_module_to_file
+#
+# Resolves a module name to a file name
+#
+_nb_module_to_file() {
+  local lib
+  if echo "$1" | grep -q -v ^/; then
+    lib=$(nb_path_chooser "$1" ${NB_CORE} ${NB_BASE} ${NB_USER})
+  else
+    lib="$1"
+  fi
+  echo "$lib"
+}
+
+#
+# nb_is_core
+#
+# Returns true if the specified module is in the core of nb
+#
+nb_is_core() {
+  local f=$(_nb_module_to_file $1)
+  f=${f%/}
+  [[ "${f%/*}" = "${NB_CORE}" ]]
+}
+
+#
+# nb_load_file
+#
+nb_load_file() {
+  [[ ! -r "$1" ]] && nb_fatal "nb_load_file: Cannot read file ($1)" && return 1
+  . "$1"
+}
+
+#
+# nb_load_module
+#
+nb_load_module() {
+  local lib=$(_nb_module_to_file $1)
+  [[ -z "$lib" ]] && nb_fatal "nb_load: Cannot find module ($1)" && return 1
+  nb_load_file "$lib"
+}
+
+#
+# nb_depends
+#
+# Load dependencies for a module
+#
+nb_depends() {
+  local i
+
+  if nb_is_true warn_loading_disabled_mod; then
+    # If we want to be warned when loading disabled modules
+    for i in "$@"; do
+      nb_is_enabled $i \
+        || nb_echo "nb_depends: WARNING! Loading disabled module! ($i)"
+      nb_load_module "$i" || return 1
+    done
+  else
+    # Simply load, no check
+    for i in "$@"; do
+      nb_load_module "$i" || return 1
+    done
+  fi
+}
+
+#
+# nb_is_enabled
+#
+# Returns true if the specified module/file is enabled in the configuration
+#
+nb_is_enabled() {
+  local n=${1##nb-}
+  nb_is_true load_${n/-/_}
+}
+
+#
+# nb_load_if_enabled
+#
+# Loads a module if it is enabled
+#
+nb_load_if_enabled() {
+  local i m
+  for i in "$@"; do
+    m=${i##*/}
+    nb_is_enabled "$m" && nb_load_module "$m"
+  done
+}
+
+##############################################################################
+
+for __nb_i in ${NB_CORE}/nb-*; do
+  nb_load_module $__nb_i
+  if [[ "$?" != 0 ]]; then
+    nb_fatal "Error $? loading core module ($__nb_i)"
+    return 1
+  fi
+done
+unset __nb_i
+
+nb_load_if_enabled ${NB_BASE}/nb-*
+nb_load_if_enabled ${NB_USER}/nb-*
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:
+#
+# vim: tabstop=2: shiftwidth=2: expandtab:
+
+
+# Keep this at the end
+set -o history
+

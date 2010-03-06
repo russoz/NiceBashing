@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+#
+# $Id: copy-nb,v 1.7 2009/10/11 12:29:54 russoz Exp $
+#
+# Alexei Znamensky <russoz@user.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+msg() {
+  echo "$@" >&2
+}
+
+normalize_dir() {
+  perl -MCwd=abs_path -le 'print abs_path(shift)' "$@"
+}
+
+##############################################################################
+
+nbhome_src="$1"
+nbhome_dst="$2"
+remote="${3:-0}"
+
+[[ -z "$nbhome_src" || -z "$nbhome_dst" ]] && {
+  msg "usage: copy-nb <NB home src> <NB home dst> [<remote>]"
+  exit 1
+}
+
+[[ "$remote" = "1" ]] || nbhome_dst=$(normalize_dir $nbhome_dst)
+
+if [[ -x /usr/bin/ssh ]]; then
+  ssh=/usr/bin/ssh
+else
+  ssh=$(which ssh)
+fi
+if [[ -x /usr/bin/rsync ]]; then
+  rs=/usr/bin/rsync
+else
+  rs=$(which rsync)
+fi
+rsync="$rs -rlptuCz -e \"$ssh\" "
+dirlist="base bin doc load load.var nbcore sbin skel"
+
+_copy() { (
+  cd ${nbhome_src}
+  $rsync --delete ${dirlist} ${nbhome_dst}/
+  [ -f conf/peers ] \
+    && $rsync -R conf/peers ${nbhome_dst}
+  [ -f conf/user.conf ] \
+    && $rsync -R conf/user.conf ${nbhome_dst}
+  $rsync -R conf/defaults.conf ${nbhome_dst}
+) }
+
+msg "Copying NB         [ ${nbhome_src} -> ${nbhome_dst} ]"
+_copy || {
+  msg "${0##*/}: Error copying the files"
+  exit 1
+}
+res=$?
+
+[[ "$remote" = "1" ]] && exit $res;
+
+exit $res
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:
+

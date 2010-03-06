@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+#
+# $Id: nb-setup,v 1.20 2009/10/29 04:11:14 russoz Exp $
+#
+# Alexei Znamensky <russoz@user.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+usage() {
+  cat >&2 <<'EOM'
+usage: nb-setup [-h] [-r <remote-host>] [-d <dest>] 
+
+nb-setup installs the NB scripts
+
+By default, it installs on ${HOME}/.nb, but you may specify any location.
+
+    -h      Prints this help message
+    -d      Destination directory to install nb.
+    -r      Remote host. It will install NB in that remote host, in ${HOME}/.nb
+            or in the path specified by the -d option. You must have access
+            through ssh to that host. User names may be specified as in 
+            user@host, just like in ssh or scp.
+    -y      Respond 'yes' to all questions.
+
+ * This script requires ssh and rsync to be installed on the remote host
+   if installing NB on other machines
+
+EOM
+  exit 1
+}
+
+if [[ -x /usr/bin/ssh ]]; then
+  ssh=/usr/bin/ssh
+else
+  ssh=$(which ssh)
+fi
+
+msg() {
+  echo "$@" >&2
+}
+
+while getopts ":d:r:hy" opt; do
+  case "$opt" in
+    d)   dest_dir="$OPTARG" ;;
+    r)   remote_host="$OPTARG" ;;
+    y)   opt_y=1 ;;
+    h|?) usage ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+[[ -n "$1" ]] && usage
+
+##############################################################################
+
+is_remote() {
+  [[ -n "$remote_host" ]]
+}
+
+normalize_dir() {
+  perl -MCwd=abs_path -le 'print abs_path(shift)' "$1"
+}
+
+##############################################################################
+
+# Determining origin
+d=${0%/*}
+nb_sbin_dir=$(normalize_dir "$d")
+nb_sbin_dir=${nb_sbin_dir%/}
+
+NB_HOME="${nb_sbin_dir}/.."
+NB_HOME="${NB_HOME%/*/*}"
+
+s="${NB_HOME}/sbin"
+
+msg "Installing from: ${NB_HOME}"
+
+if is_remote; then
+  # Remote destination
+  dest_dir=${dest_dir:=.nb}
+  full_dest="${remote_host}:${dest_dir%/}"
+else
+  # Local destination
+  dest_dir=${dest_dir:=${HOME}/.nb}
+  dest_dir=$(normalize_dir "$dest_dir")
+  full_dest="${dest_dir%/}"
+
+  # Basic check for dumbness...
+  [[ "${NB_HOME}" == "${full_dest}" ]] && {
+    msg "**Duh! Installing on itself?"
+    exit 1
+  }
+fi
+
+msg "Installing to..: ${full_dest}"
+
+# Confirm
+if [[ "$opt_y" != "1" ]]; then
+  read -n 1 -s -p "Confirm (y/N): " confirm
+  msg ""
+  [[ "$confirm" == "Y" || "$confirm" == "y" ]] \
+    || exit 0
+fi
+
+if is_remote; then
+  # SSH setup?
+  [[ ! -f ${HOME}/.ssh/id_dsa.pub && ! -f ${HOME}/.ssh/id_rsa.pub ]] && {
+    msg "No SSH key found. Want to proceed without one (Y/n)?"
+    read -n 1 -s -p "Confirm (y/N): " confirm
+    msg ""
+    [[ "$confirm" == "Y" || "$confirm" == "y" ]] \
+      && ${s}/setup-ssh
+  }
+
+  # Remote installation
+  tmpdir=.nbtmp.$$
+  rem_cmd="$ssh $remote_host"
+  ${s}/copy-nb ${NB_HOME} ${remote_host}:${tmpdir} 1 \
+    && $rem_cmd ${tmpdir}/sbin/install-nb ${tmpdir} ${dest_dir} \
+      && $rem_cmd rm -rf ${tmpdir}
+else
+  # Local installation
+  ${s}/install-nb "${NB_HOME}" "${full_dest}"
+fi
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:
+

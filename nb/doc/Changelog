@@ -1,0 +1,82 @@
+Changelog
+
+Version 0.[789]
+  * Moved many expressions to use of the constructs ${p#pattern} and ${p%pattern}
+  * Moved core to nbcore to simplify the rsync command lines
+  * load
+    * Improved bash detection
+    * Suppressing history entries for NB load process
+    * Created nb_vecho which will check verbosity and if running in a terminal
+  * sbin/nb-setup
+    * Huge refactor, featuring a complete break-up of the many different actions,
+      namely:
+      * sbin/copy-nb
+      * sbin/configure-load
+      * sbin/configure-profile
+    * Created a new sbin/install-nb that calls the steps above, in that order
+    * Remote installation logic (from <here> to <host>:<there>) now consists of:
+      1. copy-nb <here> <host>:<temp>
+      2. ssh <host> <temp>/sbin/install-nb <there>
+  * Created nbcore/nb-peers
+    * New in NB, a system of replication for NB
+    * Two functions:
+      * nb-add-host <host>
+        Adds a host to our list of peers, which will have NB kept in sync
+      * nb-sync-host (-a|<hostname>)
+        Where -a stands for "all" servers in the list, or you can specify
+  * base/nb-term
+    * Got term-set-title right this time
+
+Version 0.6
+
+  * Added remote installation to nb-setup
+  * load:
+    * Moved the bash checking code from nb-bash to load. It is the first thing
+      done now. If not running bash, nothing else will be run.
+    * Since it's assured to be runnning under bash now, added 'local'
+      declarations to variables within functions. Removed subshell'ed functions,
+      that were created to avoid leaving junk variables after invocation.
+    * Simplified nb_set and nb_get
+    * Rewrote nb_load_settings loop
+    * Moved configuration reading closer to the beginning of the file, it is
+      considered a critical part of the NB loading process
+    * Renamed nb_load to nb_load_module, for clarity
+    * Aesthetic changes galore
+  * nb-setup
+    * Now support options (getopts)
+    * Usage message
+    * Supports remote installation through rsync/ssh
+  * Perl scripts
+    * Formatted with perl tidy
+    * using strict and warnings
+    * using open() with 3-params
+  * Using grep -q rather than >/dev/null
+  * Added nb-screen, for GNU Screen
+  
+
+Version 0.5
+
+  * Reworked on the directory layout again
+  * User files should go at ~/.nb/user
+  * Many small improvements
+
+Version 0.4
+
+  * NB default entry point is now ~/.nb/load
+  * Simplified directory structure
+  * Added nb-aix for AIX specific commands
+
+Version 0.3
+
+  * Started writing net-host-update: not functional yet
+  * Many indentation/formatting changes
+  * Unsetting variables after use to ensure to junk is left behind in the 
+    environment
+  * Fixed some functions, added some
+  * Checking if session is interactive or not
+
+Version 0.2
+
+  * First public release
+  * Config files are not scripts
+

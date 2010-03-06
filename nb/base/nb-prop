@@ -1,0 +1,26 @@
+#!/bin/bash -e 'echo Do not run this >&2; exit 1'
+#
+# $Id: nb-prop,v 1.4 2009/10/11 12:24:15 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net> 
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+[[ -n "${_NB_PROP}" ]] && return
+_NB_PROP='$Id: nb-prop,v 1.4 2009/10/11 12:24:15 russoz Exp $'
+nb_vecho $_NB_PROP
+
+# functions here
+
+#############################################################################
+
+# aliases and one-time runs here
+wrap-bin ${NB_HOME}/bin/prop-*
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:

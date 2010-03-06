@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+#
+# $Id: net-host-update,v 1.4 2008/02/14 22:26:09 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net> 
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+use Socket;
+
+sub load_file {
+	my $filename = shift;
+	my @file;
+
+	open FH, "$filename" || die $!;
+	while(<FH>) {
+		chomp;
+		push @file, $_;
+	}
+  close FH || die $!;
+
+  return @file;
+}
+
+sub update_host {
+	my $host = shift;
+
+	print "Looking up $host\n";
+	@addrs = gethostbyname $host;
+	@addrs = map { inet_ntoa($_) } @addrs[4 .. $#addrs];
+
+	print "addrs = @addrs\n";
+}
+
+my @hosts = load_file("/etc/hosts");
+
+$h = shift;
+
+update_host $h;
+
+
+# aliases and one-time runs here
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:

@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+#
+# $Id: sync-other,v 1.2 2009/10/11 12:29:54 russoz Exp $
+#
+# Alexei Znamensky <russoz@user.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+msg() {
+  echo "$@" >&2
+}
+
+normalize_dir() {
+  perl -MCwd=abs_path -le 'print abs_path(shift)' "$@"
+}
+
+##############################################################################
+
+nbhome="$1"
+remote="$2"
+
+[[ -z "$nbhome" || -z "$remote" ]] && {
+  msg "usage: sync-other <NB home> <remote-host>"
+  exit 1
+}
+
+if [[ -x /usr/bin/ssh ]]; then
+  ssh=/usr/bin/ssh
+else
+  ssh=$(which ssh)
+fi
+if [[ -x /usr/bin/rsync ]]; then
+  rs=/usr/bin/rsync
+else
+  rs=$(which rsync)
+fi
+rsync="$rs -rlptuCz -e \"$ssh\" -R"
+
+_copy() { (
+  [[ ! -s ${nbhome}/conf/others ]] && return
+  files="$(cat ${nbhome}/conf/others)"
+
+  cd ${HOME}
+  $rsync ${files} ${remote}:
+  $rsync $(for f in $files; do echo "${remote}:${f}"; done) .
+) }
+
+msg "Copying user files [ ${remote} ]"
+_copy || {
+  msg "${0##*/}: Error copying the files"
+  exit 1
+}
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:
+

@@ -1,0 +1,30 @@
+$Id: TODO,v 1.12 2009/08/14 05:22:56 russoz Exp $
+
+Things TO DO
+
+* generate documentation from source -> bashdoc?
+
+* export functions
+    export -f functionname
+  or
+    set -a at the beginning, and set +a at the end?
+  or
+    create a new setting for nb that will control that behaviour
+
+* populate nb-term
+  - color names
+  - term commands
+
+* make a nb-debug module with functions like:
+  - debug-info(), debug-warn(), debug-error() and control behaviour with a
+    global variable of "debug level"
+  - is there a log4sh? is it worth the trouble?
+
+* make the net-hosts-{update,delete} scripts
+
+* dynamically created functions. Use eval for that.
+
+related to:
+* remove configuration variable testing from the functions, instead 
+  construct the functions dynamically with or without the feature, as needed.
+

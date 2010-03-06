@@ -1,0 +1,35 @@
+#!/bin/sh -e 'echo Do not run this >&2; exit 1'
+#
+# $Id: nb-screen,v 1.4 2009/10/11 12:24:14 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net> 
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+[[ -n "${_NB_SCREEN}" ]] && return
+_NB_SCREEN='$Id: nb-screen,v 1.4 2009/10/11 12:24:14 russoz Exp $'
+nb_vecho $_NB_SCREEN
+
+# functions here
+
+#############################################################################
+
+bash-is-interactive || return
+
+[[ -z "$(which screen 2>/dev/null)" ]] \
+  && { nb_vecho "nb-screen: cannot find 'screen'"; return 0; }
+
+[[ "$TERM" != "screen" ]] && {
+  #screen -dRU
+  :
+}
+
+# aliases and one-time runs here
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:

@@ -1,0 +1,185 @@
+#!/bin/bash -e 'echo Do not run this >&2; exit 1'
+#
+# $Id: nb-common,v 1.7 2009/10/20 17:34:36 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+[[ -n "${_NB_COMMON}" ]] && return
+_NB_COMMON='$Id: nb-common,v 1.7 2009/10/20 17:34:36 russoz Exp $'
+nb_vecho $_NB_COMMON
+
+#############################################################################
+
+#
+# usage
+#
+usage() {
+	echo "usage:" "$@" >&2
+}
+
+#
+# mkcd
+#
+# usage: mkcd <dir>
+#
+# Makes a directory and change current dir to it.
+#
+mkcd() {
+  [[ -n "$1" ]] && mkdir -p $1 && cd $1
+}
+
+#
+# cdls
+#
+# usage: cdls <dir> [<ls options>]
+#
+# Change current dir and list its content
+#
+cdls() {
+  [[ -n "$1" ]] && cd "$1" && shift && ls "$@"
+}
+
+#
+# resolve-dir
+#
+resolve-dir() {
+  ( echo "$1" | grep ^/ || echo "$PWD/$1" ) | \
+    perl -pe 's#/[^/]+/\.\.(/|$)#/#g; s#/\.(/|$)#/#g;'
+}
+
+#
+# bin-dir
+#
+# usage: bin-dir
+#
+bin-dir() {
+  local d=${0%/}
+  d=${d%/*}
+  resolve-dir $d
+}
+
+is-root() {
+  local u=$(id -u)
+  [[ "$u" -eq "0" ]] && return 0
+
+  return 1
+}
+
+reverse-args() {
+  local R=""
+  local i
+  for i in "$@"; do
+    R="$i $R"
+  done
+  echo "$R" | perl -pe 's/(^\s*|\s*$)//;'
+}
+
+_sanitize-path() {
+  local P
+  local PP
+  P="$1"
+  [[ -z "$P" ]] && return 2
+  [[ ! -d "$P" ]] && return 2
+
+  PP=$(echo $PATH | 
+    perl -pe 's#^(?:.*\:)?('"$P"')\?(?:\:.*)?$#\1#; s#/*$##;')
+  [[ "$P" == "$PP" ]] && return 1
+
+  echo "$P" | perl -ne 'chomp; exit 1 if /\s/;' \
+    || echo "WARNING: Adding a path with whitespace to PATH variable ($P)" >&2
+}
+
+#
+# append-path
+#
+# usage: append-path <path>
+#
+append-path() {
+  local i
+  for i in "$@"; do
+    _sanitize-path "$i" || return
+
+    PATH="$PATH:$i"
+  done
+}
+
+#
+# prepend-path
+#
+# usage: prepend-path <path>
+#
+prepend-path() {
+  local i
+  for i in $(reverse-args "$@"); do
+    _sanitize-path "$i" || return
+
+    PATH="$i:$PATH"
+  done
+}
+
+#
+# remove-path
+#
+# usage: remove-path <path> [ <path> ... ]
+#
+remove-path() {
+  local i
+  for i in "$@"; do
+    p=$(echo $i | 
+      perl -e '$_=$ENV{PATH}; $p=<>; chomp $p; $p =~ s#/?$##;
+        s#$p/?##g; s/::/:/g; s/(^:|:$)//g; print "$_\n";' )
+
+    PATH="$p"
+  done
+}
+
+#
+# wrap-bin
+#
+wrap-bin() {
+  local p
+  local b
+  for p in "$@"; do
+    b=${p##*/}
+
+	# keep the eval parameter in 3 lines - don't ask me
+    eval \
+      "$b() { 
+        \"$p\" \"\$@\"
+      }"
+    export -f "$b"
+  done
+}
+
+_compareDateSpec() {
+  local DR1=$(date -d "$1" +%Y%m%d)
+  local DR2=$(date -d "$2" +%Y%m%d)
+  test "$DR1" = "$DR2"
+}
+
+#############################################################################
+
+prepend-path /sbin
+prepend-path /usr/sbin
+prepend-path /usr/local/sbin
+prepend-path /usr/local/bin
+prepend-path ${HOME}/bin
+
+alias ..="cd .."
+alias ls="ls -Fa"
+alias ll="ls -laF"
+alias h=history
+alias tailf="tail -F"
+
+RSYNC_RSH="ssh -C"
+export RSYNC_RSH
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:

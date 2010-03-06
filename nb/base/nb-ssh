@@ -1,0 +1,181 @@
+#!/bin/bash -e 'echo Do not run this >&2; exit 1'
+#
+# $Id: nb-ssh,v 1.5 2009/10/11 12:23:27 russoz Exp $
+#
+# Alexei Znamensky <russoz@users.sf.net>
+#
+# Feel free to send suggestions, comments. Flames go to /dev/null.
+#
+
+[[ -n "${_NB_SSH}" ]] && return
+_NB_SSH='$Id: nb-ssh,v 1.5 2009/10/11 12:23:27 russoz Exp $'
+nb_vecho $_NB_SSH
+
+#############################################################################
+
+#
+#
+#
+_ssh-load-agent() {
+  local a
+  if [[ -z "${SSH_AGENT_PID}" ]]; then
+    if [[ -f $(nb_get ssh_agent_sh) ]]; then
+      . $(nb_get ssh_agent_sh) >/dev/null 2>&1
+    fi
+  fi
+
+  if [[ -z "${SSH_AGENT_PID}" ]] || _ssh-is-agent-dead ${SSH_AGENT_PID}; then
+    a=$(nb_get ssh_agent_sh)
+    a=${a%/}
+    mkdir -p ${a%/*}
+    $(nb_get ssh_real_ssh_agent) > $(nb_get ssh_agent_sh) 2>/dev/null
+    . $(nb_get ssh_agent_sh) >/dev/null 2>&1
+  fi
+}
+
+#
+# _ssh-is-agent-dead
+#
+# usage: _ssh-is-agent-dead <pid>
+#
+_ssh-is-agent-dead() {
+  ps -p "$1" | [[ $(egrep -c '(seahorse|ssh)-agent') == '0' ]] 2>/dev/null
+}
+
+#
+# ssh-load-key
+#
+# usage: ssh-load-key
+#
+ssh-load-key() {
+  # return true if key is loaded
+  $(nb_get ssh_real_ssh_add) -l | grep "no identities" || return 0
+
+  echo "KEY NOT LOADED..."
+  $(nb_get ssh_real_ssh_add)
+  return 1
+}
+
+_ssh-create-keys() {
+  echo "Checking for SSH pair of keys..."
+  if [[ ! -r "$(nb_get ssh_pubkey)" ]]; then
+    echo "No $(nb_get ssh_pubkey) file found."
+    echo "You haven't a pair of keys created for SSH."
+    echo "We are going to create one now. Accept the default path, but..."
+    echo "DON'T LEAVE THE PASSPHRASE EMPTY!!!!"
+    echo ""
+    "$(nb_get ssh_real_ssh_keygen)" -t dsa || \
+      { nb_echo "SSH Key Creation FAILED!!!"; return 1; }
+  else
+    echo "Found public key: $(nb_get ssh_pubkey)"
+  fi
+}
+
+_ssh-get-user-host-args() {
+  local l_flag=""
+  local RES=""
+
+  local OPTS='1246AaCfgKkMNnqsTtVvXxYb:c:D:e:F:i:L:l:m:O:o:p:R:S:w:'
+  local opt
+	
+  while getopts "$OPTS" opt; do
+    [[ "$opt" == "l" ]] && l_flag="$OPTARG"
+  done
+
+  shift $((OPTIND - 1))
+
+  [[ -z "$1" ]] && return 1
+  RES="$1"
+  [[ -n "$l_flag" ]] && RES="-l $l_flag $RES"
+  echo "$RES"
+}
+
+_ssh-is-master-running() {
+  [[ -z "$1" ]] && return 1
+  $(nb_get ssh_real_ssh) -O check -S "$(nb_get ssh_ctl_path)" "$@" 2>&1 |
+    grep -q "Master running"
+}
+
+_ssh-create-master() {
+  _ssh-is-master-running "$@" && return 0
+  $(nb_get ssh_real_ssh) -MNf -S "$(nb_get ssh_ctl_path)" "$@"
+}
+
+_ssh-copy-key() {
+  echo "Installing the key at $1:\$HOME/.ssh/authorized_keys "
+  cat $nb_ssh_pubkey \
+    | $(nb_get ssh_real_ssh) "$1" \
+        "umask 077; mkdir -p .ssh ; cat >> .ssh/authorized_keys" \
+	      || return 1
+}
+
+ssh-clean-master-sockets() {
+  local h
+	local p
+  h="$1"
+  [[ -z "$h" ]] && h='\*'
+  p=$(nb_get ssh_ctl_path)
+  p=${p/\%r/\\\*}
+  p=${p/\%h/$h}
+  rm ${p}
+}
+
+_ssh-test-connection() {
+  ssh "$1" "echo \"TEST [$1]: Hi, this is \" "'${USER}@$(hostname)'
+}
+
+#
+# ssh-setup-keys host1 [ host2 [ host3 [...] ] ]
+#
+ssh-setup-keys() {
+  local h
+  _ssh-create-keys
+
+  if [[ -z "$@" ]]; then
+    echo "::: Copying keys"
+    for h in "$@"; do
+      echo ":::::: $h"
+      _ssh-copy-key $h
+    done
+
+    echo "::: Testing connections"
+    for h in "$@"; do
+      echo ":::::: $h"
+      _ssh-test-connection $h
+    done
+  fi
+}
+
+ssh() {
+  local realssh
+  realssh=$(nb_get ssh_real_ssh)
+  
+  ssh-load-key
+  if nb_is_true ssh_use_master; then
+    host=$(_ssh-get-user-host-args "$@")
+    _ssh-create-master $host
+
+    ${realssh} -S "$(nb_get ssh_ctl_path)" "$@"
+  else
+    ${realssh} "$@"
+  fi
+}
+
+scp() {
+  ssh-load-key
+  $(nb_get ssh_real_scp) "$@"
+}
+
+sftp() {
+  ssh-load-key
+  $(nb_get ssh_real_sftp) "$@"
+}
+
+bash-is-interactive && nb_is_true ssh_autoload_agent && _ssh-load-agent
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:
