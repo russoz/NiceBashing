@@ -1,6 +1,6 @@
 #!/bin/sh -e 'echo Do not run this >&2; exit 1'
 #
-# $Id: load,v 1.24 2009/11/05 02:48:27 russoz Exp $
+# $Id: load,v 1.22 2009/10/20 18:13:06 russoz Exp $
 #
 # Alexei Znamensky <russoz@users.sf.net>
 #
@@ -16,23 +16,28 @@
 # BASH CHECK
 #
 # if there is a bash available, but we're not using it, change to it
-if [ "${BASH##*/}" != "bash" ]; then
+if [ "$(echo $BASH | sed -e 's/^.*\///')" != "bash" ]; then
   bash_err_not_found=127
   bash_err_no_exec=126
 
-  NB_SEARCH_BASH="/bin /usr/bin /usr/local/bin /opt/freeware/bin"
-  for p in $NB_SEARCH_BASH; do
-    [ -x "$p/bash" ] && NB_S="$p/bash" && break
-  done
+  if [ ! -x "$NB_BASH" ]; then
+    NB_SEARCH_BASH="
+      /bin /usr/bin /usr/local/bin
+      /opt/freeware/bin
+      /opt/csw/bin"
+    for p in $(echo $NB_SEARCH_BASH); do
+      [ -x "$p/bash" ] && NB_BASH="$p/bash" && break
+    done
 
-  # Cannot find bash
-  if [ -z "$NB_S" ]; then
-    [ -n "$PS1" ] && echo "No bash :(" >&2
-    return $bash_err_not_found
+    # Cannot find bash
+    if [ -z "$NB_BASH" ]; then
+      [ -n "$PS1" ] && echo "No bash :(" >&2
+      return $bash_err_not_found
+    fi
   fi
 
   oldshell="$SHELL"
-  SHELL="$NB_S"
+  SHELL="$NB_BASH"
   export SHELL
   [ -n "$PS1" ] && echo "Changing SHELL: $oldshell -> $SHELL" >&2
   exec $SHELL -l || return $bash_err_no_exec
@@ -48,10 +53,6 @@ fi
   echo "Your bash is too old for nb [$BASH_VERSION]" >&2
   return 1
 }
-#[[ "${BASH_VERSINFO[1]}" -lt '2' ]] && {
-#  echo "Your bash is too old for nb [$BASH_VERSION]" >&2
-#  return 1
-#}
 
 set +o posix
 set +o history
@@ -139,24 +140,15 @@ nb_load_settings() {
   local match="^([^[:space:]]+)[:space:]+(.*)$"
   
   while read -r line; do
-    {
-      echo "$line" | perl -nle '
-        s|^\s*||;
-        exit 1 if /^(#.*)?$/;
-        if( ! /^\S+\s+\S.*$/ ) {
-          exit 1
-        }' || continue
-    }
     # Skip empty and comment-lines
-    #echo "$line" | grep -E -q -c '^ *(#.*)?$' && continue
-    #[[ "$line" =~ $skip ]] && continue
+    [[ "$line" =~ $skip ]] && continue
 
     # Check syntax
-    #[[ "$line" =~ $match ]] || {
-    #    echo "Cannot parse file [${f}]:" >&2;
-    #    echo "[$line]" >&2;
-    #    return 1
-    #};
+    [[ "$line" =~ $match ]] || {
+        echo "Cannot parse file [${f}]:" >&2;
+        echo "[$line]" >&2;
+        return 1
+    };
 
     # Parse
     key="$(echo "$line" | awk '{ print $1 }')"
