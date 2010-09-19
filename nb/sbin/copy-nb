@@ -46,9 +46,7 @@ _copy() { (
   $rsync --delete ${dirlist} ${nbhome_dst}/
   [ -f conf/peers ] \
     && $rsync -R conf/peers ${nbhome_dst}
-  [ -f conf/user.conf ] \
-    && $rsync -R conf/user.conf ${nbhome_dst}
-  $rsync -R conf/defaults.conf ${nbhome_dst}
+  $rsync --exclude '*/local.conf' -R conf/*.conf ${nbhome_dst}
 ) }
 
 msg "Copying NB         [ ${nbhome_src} -> ${nbhome_dst} ]"

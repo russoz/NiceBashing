@@ -90,6 +90,10 @@ nb_sync() {
 
 nb_peer_add() {
   local p
+  [[ -z "$1" ]] && {
+    nb_echo "usage: nb_peer_add <host1> [<host2> [<host3> ...] ]"
+    return 1
+  }
   
   for p in "$@"; do
     _sync-peer-add "$p"

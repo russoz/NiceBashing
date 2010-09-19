@@ -1,7 +1,5 @@
 #!/bin/sh -e 'echo Do not run this >&2; exit 1'
 #
-# $Id: nb-screen,v 1.4 2009/10/11 12:24:14 russoz Exp $
-#
 # Alexei Znamensky <russoz@users.sf.net> 
 #
 # Feel free to send suggestions, comments. Flames go to /dev/null.

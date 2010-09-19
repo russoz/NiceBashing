@@ -1,10 +1,8 @@
 #!/bin/bash
 #
-# $Id: make-package,v 1.5 2009/10/29 04:11:14 russoz Exp $
-#
 # Alexei Znamensky <russoz@user.sf.net>
 #
-# Feel free to send suggestions, comments. Flames go to /dev/null.
+# Feel free to send suggestions, comments.
 #
 
 usage() {

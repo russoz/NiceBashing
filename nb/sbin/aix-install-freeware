@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+#
+# $Id: aix-install-freeware,v 1.1 2009/10/20 17:43:24 russoz Exp $
+#
+
+install_rpm() {
+  local url="$1"
+  local name="$2"
+
+  [[ -z "$name" || -z "$url" ]] && {
+    echo "usage: install_rpm <name> <url>" >&2
+    return 1
+  }
+
+  echo -n "$name ..."
+  rpm -Uvh "$url"
+  local ret=$?
+  echo "DONE"
+  return $ret
+}
+
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/zlib/zlib-1.2.3-4.aix5.2.ppc.rpm" "zlib 1.2.3-4"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/gzip/gzip-1.2.4a-10.aix5.2.ppc.rpm" "gzip 1.2.4a-10"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/bzip2/bzip2-1.0.5-1.aix5.2.ppc.rpm" "bzip2 1.0.5-1"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/unzip/unzip-5.51-1.aix5.1.ppc.rpm" "unzip 5.51-1"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/zip/zip-2.3-3.aix4.3.ppc.rpm" "zip 2.3-3"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/rsync/rsync-2.6.2-1.aix5.1.ppc.rpm" "rsync 2.6.2-1"
+
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/readline/readline-4.3-2.aix5.1.ppc.rpm" "readline 4.3-2"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/bash/bash-3.2-1.aix5.2.ppc.rpm" "bash 3.2-1"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/binutils/binutils-2.14-3.aix5.1.ppc.rpm" "binutils 2.13-3" 
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/coreutils/coreutils-5.2.1-2.aix5.1.ppc.rpm" "coreutils-5.2.1-2"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/cvs/cvs-1.11.17-3.aix5.1.ppc.rpm" "cvs 1.11.17-3"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/diffutils/diffutils-2.8.1-1.aix4.3.ppc.rpm" "diffutils 2.8.1-1"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/findutils/findutils-4.1-3.aix4.3.ppc.rpm" "findutils 4.1-3"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/glib2/glib2-2.8.1-3.aix5.1.ppc.rpm" "glib2 2.8.1-3"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/glib/glib-1.2.10-2.aix4.3.ppc.rpm" "glib 1.2.10-2"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/grep/grep-2.5.1-1.aix4.3.ppc.rpm" "grep 2.5.1-1"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/less/less-382-1.aix5.1.ppc.rpm" "less 382-1"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/libtool/libtool-1.5.8-2.aix5.1.ppc.rpm" "libtool 1.5.8-2"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/lynx/lynx-2.8.4-2.aix5.1.ppc.rpm" "lynx 2.8.4-2"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/make/make-3.80-1.aix5.1.ppc.rpm" "make 3.80-1"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/patch/patch-2.5.4-4.aix4.3.ppc.rpm" "patch 2.5.4-4"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/perl/perl-5.8.2-1.aix5.1.ppc.rpm" "perl 5.8.2-1"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/rcs/rcs-5.7-2.aix5.1.ppc.rpm" "rcs 5.7-2"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/rpm/rpm-3.0.5-49.aix5.2.ppc.rpm" "rpm 3.0.5-49"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/screen/screen-3.9.10-2.aix4.3.ppc.rpm" "screen 3.9.10-2"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/sed/sed-4.1.1-1.aix5.1.ppc.rpm" "sed 4.1.1-1"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/tar/tar-1.14-2.aix5.1.ppc.rpm" "tar 1.14-2"
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/traceroute/traceroute-1.4a12-2.aix4.3.ppc.rpm" "traceroute 1.4a12-2"
+
+install_rpm "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/vnc/vnc-3.3.3r2-6.aix5.1.ppc.rpm" "vnc 3.3.3r2-6"
