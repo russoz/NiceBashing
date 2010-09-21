@@ -6,8 +6,7 @@
 #
 
 [[ -n "${_NB_PROP}" ]] && return
-_NB_PROP='$Id: nb-prop,v 1.4 2009/10/11 12:24:15 russoz Exp $'
-nb_vecho $_NB_PROP
+_NB_PROP=1
 
 # functions here
 

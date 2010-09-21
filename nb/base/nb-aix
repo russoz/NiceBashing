@@ -6,8 +6,7 @@
 #
 
 [[ -n "${_NB_AIX}" ]] && return
-_NB_AIX='$Id: nb-aix,v 1.5 2009/10/11 12:46:10 russoz Exp $'
-nb_vecho $_NB_AIX
+_NB_AIX=1
 
 [[ $(uname) = "AIX" ]] || {
   nb_vecho "nb-aix: Not on an AIX system!"

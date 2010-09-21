@@ -1,15 +1,12 @@
 #!/bin/bash -e 'echo Do not run this >&2; exit 1'
 #
-# $Id: nb-common,v 1.7 2009/10/20 17:34:36 russoz Exp $
-#
 # Alexei Znamensky <russoz@users.sf.net>
 #
 # Feel free to send suggestions, comments. Flames go to /dev/null.
 #
 
 [[ -n "${_NB_COMMON}" ]] && return
-_NB_COMMON='$Id: nb-common,v 1.7 2009/10/20 17:34:36 russoz Exp $'
-nb_vecho $_NB_COMMON
+_NB_COMMON=1
 
 #############################################################################
 

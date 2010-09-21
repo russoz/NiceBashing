@@ -6,8 +6,7 @@
 #
 
 [[ -n "${_NB_TERM}" ]] && return
-_NB_TERM='$Id: nb-term,v 1.6 2009/10/11 12:23:05 russoz Exp $'
-nb_vecho $_NB_TERM
+_NB_TERM=1
 
 # functions here
 

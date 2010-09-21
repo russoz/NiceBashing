@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 #
-# $Id: prop-get-value,v 1.2 2008/10/02 03:05:13 russoz Exp $
-#
 
 use strict;
 use warnings;
