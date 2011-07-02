@@ -6,7 +6,7 @@
 #
 
 [[ -n "${_NB_NET}" ]] && return
-_NB_NET='$Id: nb-net,v 1.4 2009/10/11 12:24:14 russoz Exp $'
+_NB_NET=1
 nb_vecho $_NB_NET
 
 # functions here

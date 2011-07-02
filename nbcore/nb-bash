@@ -1,14 +1,12 @@
 #!/bin/bash -e 'echo Do not run this >&2; exit 1'
 #
-# $Id: nb-bash,v 1.5 2009/10/20 17:33:38 russoz Exp $
-#
 # Alexei Znamensky <russoz@users.sf.net>
 #
-# Feel free to send suggestions, comments. Flames go to /dev/null.
+# Feel free to send suggestions, comments.
 #
 
 [[ -n "${_NB_BASH}" ]] && return 0
-_NB_BASH='$Id: nb-bash,v 1.5 2009/10/20 17:33:38 russoz Exp $'
+_NB_BASH=1
 nb_vecho $_NB_BASH
 
 #############################################################################

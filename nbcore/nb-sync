@@ -1,14 +1,12 @@
 #!/bin/bash -e 'echo Do not run this >&2; exit 1'
 #
-# $Id: nb-sync,v 1.3 2009/10/20 17:42:46 russoz Exp $
-#
 # Alexei Znamensky <russoz@users.sf.net>
 #
-# Feel free to send suggestions, comments. Flames go to /dev/null.
+# Feel free to send suggestions, comments.
 #
 
 [[ -n "${_NB_SYNC}" ]] && return
-_NB_SYNC='$Id: nb-sync,v 1.3 2009/10/20 17:42:46 russoz Exp $'
+_NB_SYNC=1
 nb_vecho $_NB_SYNC
 
 NB_SYNC_PEERS=$(nb_get sync_peers_file)

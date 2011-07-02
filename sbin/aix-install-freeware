@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 #
-# $Id: aix-install-freeware,v 1.1 2009/10/20 17:43:24 russoz Exp $
-#
 
 install_rpm() {
   local url="$1"

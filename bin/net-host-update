@@ -1,10 +1,8 @@
 #!/usr/bin/perl
 #
-# $Id: net-host-update,v 1.4 2008/02/14 22:26:09 russoz Exp $
-#
 # Alexei Znamensky <russoz@users.sf.net> 
 #
-# Feel free to send suggestions, comments. Flames go to /dev/null.
+# Feel free to send suggestions, comments.
 #
 
 use Socket;

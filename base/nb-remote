@@ -6,7 +6,7 @@
 #
 
 [[ -n "${_NB_REMOTE}" ]] && return
-_NB_REMOTE='$Id: nb-remote,v 1.4 2009/10/11 12:24:15 russoz Exp $'
+_NB_REMOTE=1
 nb_vecho $_NB_REMOTE
 
 # functions here

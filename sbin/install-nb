@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 #
-# $Id: install-nb,v 1.4 2009/10/06 23:42:38 russoz Exp $
-#
 # Alexei Znamensky <russoz@user.sf.net>
 #
-# Feel free to send suggestions, comments. Flames go to /dev/null.
+# Feel free to send suggestions, comments.
 #
 
 nb_src="$1"

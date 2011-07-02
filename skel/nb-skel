@@ -1,14 +1,12 @@
 #!/bin/sh -e 'echo Do not run this >&2; exit 1'
 #
-# $Id: nb-skel,v 1.2 2009/07/23 03:51:56 russoz Exp $
-#
 # Alexei Znamensky <russoz@users.sf.net> 
 #
-# Feel free to send suggestions, comments. Flames go to /dev/null.
+# Feel free to send suggestions, comments.
 #
 
 [ -n "${_NB_SKEL}" ] && return
-_NB_SKEL='$Id: nb-skel,v 1.2 2009/07/23 03:51:56 russoz Exp $'
+_NB_SKEL=1
 nb_vecho $_NB_SKEL
 
 nb_depends nb-bash nb-common || return 1

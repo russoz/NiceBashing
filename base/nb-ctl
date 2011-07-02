@@ -6,7 +6,7 @@
 #
 
 [[ -n "${_NB_CTL}" ]] && return
-_NB_CTL='$Id: nb-ctl,v 1.3 2009/08/06 07:24:03 russoz Exp $'
+_NB_CTL=1
 nb_vecho $_NB_CTL
 
 ##
