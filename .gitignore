@@ -2,5 +2,6 @@
 *.bak
 *~
 conf/local.conf
+conf/user.conf
 conf/peers
 conf/others
