@@ -106,7 +106,7 @@ nb_fatal() {
 # Sets a NB variable
 #
 nb_set() {
-  eval "export ${NB_VAR_PREFIX}_${1}=${2}"
+  _nb_conf[${1}]="${2}"
 }
 
 #
@@ -115,7 +115,7 @@ nb_set() {
 # Gets the value of a NB variable
 #
 nb_get() {
-  eval "echo \$${NB_VAR_PREFIX}_$1"
+  echo ${_nb_conf[${1}]}
 }
 
 #
@@ -148,12 +148,17 @@ nb_load_settings() {
         return 1
     };
 
+	[[ "$line" =~ '[;`]' ]] && {
+		echo "Possible evil detected in file " ${f} >&2
+        echo "[$line]" >&2;
+        return 1
+    };
+
     # Parse
-    key="$(echo "$line" | awk '{ print $1 }')"
-    val="$(echo "$line" | perl -pe 's|^\S+\s+||; s|\s*||')"
+	eval "parse=($line)"
     
     # Set variable
-    nb_set "$key" "$val"
+    nb_set "${parse[0]}" "${parse[1]}"
   done <${f}
 }
 
@@ -195,16 +200,34 @@ nb_vecho() {
   return 1
 }
 
-nb_load_settings "${NB_DEFAULTS}" || return 1
+nb_load_settings "${NB_DEFAULTS}" || {
+	nb_fatal "Cannot load default configuration file:" ${NB_DEFAULTS}
+	return 1
+}
 
 # load settings (Operating System)
-[[ -r "${NB_OSCONF}"    ]] && nb_load_settings "${NB_OSCONF}"
+[[ -r "${NB_OSCONF}"    ]] && {
+	nb_load_settings "${NB_OSCONF}" || {
+		nb_fatal "Cannot load configuration file:" ${NB_OSCONF}
+		return 1
+	}
+}
 
 # load settings (user)
-[[ -r "${NB_USERCONF}"  ]] && nb_load_settings "${NB_USERCONF}"
+[[ -r "${NB_USERCONF}"  ]] && {
+	nb_load_settings "${NB_USERCONF}" || {
+		nb_fatal "Cannot load configuration file:" ${NB_USERCONF}
+		return 1
+	}
+}
 
 # load settings (local)
-[[ -r "${NB_LOCALCONF}" ]] && nb_load_settings "${NB_LOCALCONF}"
+[[ -r "${NB_LOCALCONF}" ]] && {
+	nb_load_settings "${NB_LOCALCONF}" || {
+		nb_fatal "Cannot load configuration file:" ${NB_LOCALCONF}
+		return 1
+	}
+}
 
 ##############################################################################
 
@@ -264,8 +287,12 @@ nb_load_file() {
 # nb_load_module
 #
 nb_load_module() {
-  local lib=$(_nb_module_to_file $1)
+  local m=$1
+  local lib=$(_nb_module_to_file $m)
   [[ -z "$lib" ]] && nb_fatal "nb_load: Cannot find module ($1)" && return 1
+  [[ -n ${_nb_loaded[$lib]} ]] && return 0
+  _nb_loaded[$m]=$lib
+  nb_vecho "Loading module" ${m##*/} "at:" $lib
   nb_load_file "$lib"
 }
 
@@ -311,18 +338,22 @@ nb_load_if_enabled() {
   local i m
   for i in "$@"; do
     m=${i##*/}
-    nb_is_enabled "$m" && nb_load_module "$m"
+    nb_is_enabled "$m" && {
+		nb_load_module "$m" || {
+			nb_fatal "Cannot load module:" $m
+			return 1
+		}
+	}
   done
 }
 
 ##############################################################################
 
 for __nb_i in ${NB_CORE}/nb-*; do
-  nb_load_module $__nb_i
-  if [[ "$?" != 0 ]]; then
+  nb_load_module $__nb_i || {
     nb_fatal "Error $? loading core module ($__nb_i)"
     return 1
-  fi
+  }
 done
 unset __nb_i
 

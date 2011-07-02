@@ -5,10 +5,6 @@
 # Feel free to send suggestions, comments.
 #
 
-[[ -n "${_NB_SYNC}" ]] && return
-_NB_SYNC=1
-nb_vecho $_NB_SYNC
-
 NB_SYNC_PEERS=$(nb_get sync_peers_file)
 NB_SYNC_OTHER=$(nb_get sync_other_files)
 

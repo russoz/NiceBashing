@@ -16,3 +16,6 @@ export NB_HOME NB_BASE NB_USER NB_DEFAULTS NB_USERCONF NB_LOCALCONF
 NB_VAR_PREFIX="__nb"
 NB_STACKTRACE="1"
 
+declare -A _nb_conf
+declare -A _nb_loaded
+

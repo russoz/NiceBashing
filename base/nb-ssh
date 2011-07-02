@@ -5,12 +5,6 @@
 # Feel free to send suggestions, comments. Flames go to /dev/null.
 #
 
-[[ -n "${_NB_SSH}" ]] && return
-_NB_SSH=1
-nb_vecho $_NB_SSH
-
-#############################################################################
-
 #
 #
 #
