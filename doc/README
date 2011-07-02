@@ -23,7 +23,7 @@ Untar the contents of the package in a temporary directory, then:
 It will install itself in the ~/.nb directory, and it will add a line invoking
 itself to your ~/.bashrc or ~/.profile file.
 
-Open a new shell and enjoy :-) You can set/unset your configurations by 
+Open a new shell and enjoy :-) You can set/unset your configurations by
 editing the ~/.nb/conf/user.conf file. As a suggestion, make it a copy of
 defaults.conf to start with, and then tailor it to your own taste.
 
@@ -63,7 +63,7 @@ local settings.
     NB_USERCONF:  $NB_HOME/conf/user.conf
         This is the where the user configurations should go.
         (Synchronized to all peers)
-        
+
     NB_LOCALCONF: $NB_HOME/conf/local.conf
         Thse configurations are strictly local to the system where it exists.
         (Not synchronized to all peers)
