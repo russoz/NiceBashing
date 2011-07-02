@@ -201,32 +201,32 @@ nb_vecho() {
 }
 
 nb_load_settings "${NB_DEFAULTS}" || {
-	nb_fatal "Cannot load default configuration file:" ${NB_DEFAULTS}
-	return 1
+  nb_fatal "Cannot load default configuration file:" ${NB_DEFAULTS}
+  return 1
 }
 
 # load settings (Operating System)
 [[ -r "${NB_OSCONF}"    ]] && {
-	nb_load_settings "${NB_OSCONF}" || {
-		nb_fatal "Cannot load configuration file:" ${NB_OSCONF}
-		return 1
-	}
+  nb_load_settings "${NB_OSCONF}" || {
+    nb_fatal "Cannot load configuration file:" ${NB_OSCONF}
+    return 1
+  }
 }
 
 # load settings (user)
 [[ -r "${NB_USERCONF}"  ]] && {
-	nb_load_settings "${NB_USERCONF}" || {
-		nb_fatal "Cannot load configuration file:" ${NB_USERCONF}
-		return 1
-	}
+  nb_load_settings "${NB_USERCONF}" || {
+    nb_fatal "Cannot load configuration file:" ${NB_USERCONF}
+    return 1
+  }
 }
 
 # load settings (local)
 [[ -r "${NB_LOCALCONF}" ]] && {
-	nb_load_settings "${NB_LOCALCONF}" || {
-		nb_fatal "Cannot load configuration file:" ${NB_LOCALCONF}
-		return 1
-	}
+  nb_load_settings "${NB_LOCALCONF}" || {
+    nb_fatal "Cannot load configuration file:" ${NB_LOCALCONF}
+    return 1
+  }
 }
 
 ##############################################################################
