@@ -1,3 +1,6 @@
 *.swp
 *.bak
 *~
+conf/local.conf
+conf/peers
+conf/others
