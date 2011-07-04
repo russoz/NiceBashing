@@ -1,14 +1,18 @@
 #!/bin/sh -e 'echo Do not run this >&2; exit 1'
 #
-# Alexei Znamensky <russoz@users.sf.net>
+# Alexei Znamensky <russoz@cpan.org>
 #
 # Feel free to send suggestions, comments.
 #
 
 #
-# This script may be run in Bourne shell, thus restrictions may apply.
-# Do not use bash-isms here.
+# This script may be started in a old plain Bourne shell, thus restrictions
+# may apply.
+# Do not use bash-isms until the section where the script is assuredly
+# running on Bash.
 #
+
+[ -n "$PS1" ] && echo "Loading NB [`date`]" >&2
 
 #
 # BASH CHECK
@@ -45,12 +49,6 @@ fi
 #
 # BASH FROM NOW ON
 #
-
-# Checking bash version
-[[ "${BASH_VERSINFO[0]}" -lt '3' ]] && {
-  echo "Your bash is too old for nb [$BASH_VERSION]" >&2
-  return 1
-}
 
 set +o posix
 set +o history
@@ -101,28 +99,10 @@ nb_fatal() {
 }
 
 #
-# nb_set
-#
-# Sets a NB variable
-#
-nb_set() {
-  _nb_conf[${1}]="${2}"
-}
-
-#
-# nb_get
-#
-# Gets the value of a NB variable
-#
-nb_get() {
-  echo ${_nb_conf[${1}]}
-}
-
-#
 # nb_is_true
 #
 nb_is_true() {
-  [ "$(nb_get $1)" == "1" ] 
+  [ "$(nb_get $1)" == "1" ]
 }
 
 #
@@ -133,10 +113,10 @@ nb_is_true() {
 nb_load_settings() {
   local f=${1}
   local key val
-  
+
   local skip="^[:space:]*(#.*)?$"
   local match="^([^[:space:]]+)[:space:]+(.*)$"
-  
+
   while read -r line; do
     # Skip empty and comment-lines
     [[ "$line" =~ $skip ]] && continue
@@ -148,7 +128,7 @@ nb_load_settings() {
         return 1
     };
 
-	[[ "$line" =~ '[;`]' ]] && {
+	[[ "$line" =~ '[();`]' ]] && {
 		echo "Possible evil detected in file " ${f} >&2
         echo "[$line]" >&2;
         return 1
@@ -156,7 +136,7 @@ nb_load_settings() {
 
     # Parse
 	eval "parse=($line)"
-    
+
     # Set variable
     nb_set "${parse[0]}" "${parse[1]}"
   done <${f}
@@ -257,7 +237,7 @@ nb_die() {
 _nb_module_to_file() {
   local lib
   if echo "$1" | grep -q -v ^/; then
-    lib=$(nb_path_chooser "$1" ${NB_CORE} ${NB_BASE} ${NB_USER})
+    lib=$(nb_path_chooser "$1" ${NB_CORE} ${NB_OS} ${NB_BASE} ${NB_USER})
   else
     lib="$1"
   fi
@@ -279,20 +259,30 @@ nb_is_core() {
 # nb_load_file
 #
 nb_load_file() {
-  [[ ! -r "$1" ]] && nb_fatal "nb_load_file: Cannot read file ($1)" && return 1
-  . "$1"
+  [[ ! -r "$1" ]] && {
+    nb_fatal "nb_load_file: Cannot read file ($1)"
+	return 1
+  }
+  . "$1" || {
+    nb_fatal "nb_load_file: failed to load file ($1)"
+    return 1
+  }
 }
 
 #
 # nb_load_module
 #
 nb_load_module() {
-  local m=$1
+  local m=${1##*/}
   local lib=$(_nb_module_to_file $m)
-  [[ -z "$lib" ]] && nb_fatal "nb_load: Cannot find module ($1)" && return 1
-  [[ -n ${_nb_loaded[$lib]} ]] && return 0
-  _nb_loaded[$m]=$lib
-  nb_vecho "Loading module" ${m##*/} "at:" $lib
+  [[ -z "$lib" ]] && {
+    nb_vecho "Loading NB module: nb_load: Cannot find module ($1)"
+    return 1
+  }
+  nb_is_loaded $m  && return 0
+  nb_vecho -n 'Loading NB module: '
+  nb_set_loaded $m
+  nb_vecho "$(printf '%15s from %s' ${m##*/} $lib)"
   nb_load_file "$lib"
 }
 
@@ -349,6 +339,7 @@ nb_load_if_enabled() {
 
 ##############################################################################
 
+# loading core modules
 for __nb_i in ${NB_CORE}/nb-*; do
   nb_load_module $__nb_i || {
     nb_fatal "Error $? loading core module ($__nb_i)"
@@ -357,8 +348,16 @@ for __nb_i in ${NB_CORE}/nb-*; do
 done
 unset __nb_i
 
+# load OS-specific module
+nb_load_module nb-$(uname)
+
+# load base modules, as enabled
 nb_load_if_enabled ${NB_BASE}/nb-*
+
+# load user modules, as enabled
 nb_load_if_enabled ${NB_USER}/nb-*
+
+nb_vecho "Loaded  NB [$(date)]"
 
 # Emacs config
 #
@@ -369,7 +368,6 @@ nb_load_if_enabled ${NB_USER}/nb-*
 #
 # vim: tabstop=2: shiftwidth=2: expandtab:
 
-
-# Keep this at the end
+# Keep this at the very end
 set -o history
 

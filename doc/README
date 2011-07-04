@@ -103,11 +103,11 @@ Rules || Conventions:
         nb-ssh, which obviously must have the same names of the ones they're
         overriding.
 
-* Functions names should always be lower-case, and compound names should be 
+* Functions names should always be lower-case, and compound names should be
   compound-names, dash-separated. Like all-lower-dash-sep-grinder, got-it?
 * You may have external programs/scripts installed in $NB_HOME/bin, using the
   same naming convention of functions, and then add wrapper functions around
-  them. As a matter of fact, there's a function wrap-bin() defined in 
+  them. As a matter of fact, there's a function wrap-bin() defined in
   nb-common which will create a wrapper function for you.
 * Parameterize all external binaries in variables
 * Review everything for security flaws and bash best practices

@@ -52,7 +52,7 @@ Version 0.6
     * using open() with 3-params
   * Using grep -q rather than >/dev/null
   * Added nb-screen, for GNU Screen
-  
+
 
 Version 0.5
 
@@ -70,7 +70,7 @@ Version 0.3
 
   * Started writing net-host-update: not functional yet
   * Many indentation/formatting changes
-  * Unsetting variables after use to ensure to junk is left behind in the 
+  * Unsetting variables after use to ensure to junk is left behind in the
     environment
   * Fixed some functions, added some
   * Checking if session is interactive or not

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Alexei Znamensky <russoz@user.sf.net>
+# Alexei Znamensky <russoz@cpan.org>
 #
 # Feel free to send suggestions, comments.
 #
@@ -38,7 +38,7 @@ cd ${here}/../..
 
 } && {
   echo "Tagging..."
-  cvs -q tag -R -F "v$version" 
+  cvs -q tag -R -F "v$version"
 } && {
   echo "Commiting tags..."
   cvs -q commit -m "Release: $version" -f nb
@@ -46,7 +46,7 @@ cd ${here}/../..
   echo "Exporting..."
   [[ -d "$TMPDIR" ]] && rm -rf "$TMPDIR"
   mkdir -p "$TMPDIR"
-  ( cd "$TMPDIR" 
+  ( cd "$TMPDIR"
     cvs -q export -r "v$version" nb )
 } && {
   echo "Removing dev tree..."

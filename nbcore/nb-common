@@ -1,6 +1,6 @@
 #!/bin/bash -e 'echo Do not run this >&2; exit 1'
 #
-# Alexei Znamensky <russoz@users.sf.net>
+# Alexei Znamensky <russoz@cpan.org>
 #
 # Feel free to send suggestions, comments.
 #
@@ -76,7 +76,7 @@ _sanitize-path() {
   [[ -z "$P" ]] && return 2
   [[ ! -d "$P" ]] && return 2
 
-  PP=$(echo $PATH | 
+  PP=$(echo $PATH |
     perl -pe 's#^(?:.*\:)?('"$P"')\?(?:\:.*)?$#\1#; s#/*$##;')
   [[ "$P" == "$PP" ]] && return 1
 
@@ -120,7 +120,7 @@ prepend-path() {
 remove-path() {
   local i
   for i in "$@"; do
-    p=$(echo $i | 
+    p=$(echo $i |
       perl -e '$_=$ENV{PATH}; $p=<>; chomp $p; $p =~ s#/?$##;
         s#$p/?##g; s/::/:/g; s/(^:|:$)//g; print "$_\n";' )
 
@@ -139,7 +139,7 @@ wrap-bin() {
 
 	# keep the eval parameter in 3 lines - don't ask me
     eval \
-      "$b() { 
+      "$b() {
         \"$p\" \"\$@\"
       }"
     export -f "$b"

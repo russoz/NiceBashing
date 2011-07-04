@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Alexei Znamensky <russoz@user.sf.net>
+# Alexei Znamensky <russoz@cpan.org>
 #
 # Feel free to send suggestions, comments.
 #
@@ -37,7 +37,7 @@ else
   rs=$(which rsync)
 fi
 rsync="$rs -rlptuCz -e \"$ssh\" "
-dirlist="base bin doc load load.var nbcore sbin skel"
+dirlist="base bin doc load load.var load.v3 load.v4 nbcore sbin skel"
 
 _copy() { (
   cd ${nbhome_src}

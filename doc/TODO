@@ -23,6 +23,6 @@ Things TO DO
 * dynamically created functions. Use eval for that.
 
 related to:
-* remove configuration variable testing from the functions, instead 
+* remove configuration variable testing from the functions, instead
   construct the functions dynamically with or without the feature, as needed.
 

@@ -1,6 +1,6 @@
 #!/bin/bash -e 'echo Do not run this >&2; exit 1'
 #
-# Alexei Znamensky <russoz@users.sf.net>
+# Alexei Znamensky <russoz@cpan.org>
 #
 # Feel free to send suggestions, comments.
 #
@@ -62,7 +62,7 @@ nb_sync() {
     }
     _sync-peer ${p}
   }
-  
+
   [[ ! -s ${NB_SYNC_PEERS} ]] && return 0
 
   if [[ "$(nb_get sync_parallel)" == "1" ]]; then
@@ -88,14 +88,14 @@ nb_peer_add() {
     nb_echo "usage: nb_peer_add <host1> [<host2> [<host3> ...] ]"
     return 1
   }
-  
+
   for p in "$@"; do
     _sync-peer-add "$p"
   done
-  
+
   for p in "$@"; do
     ${NB_HOME}/sbin/nb-setup -y -r "${p}"
-    
+
     # sync user-specified files
     _sync-file "${p}"
   done

@@ -1,0 +1,19 @@
+declare -A _nb_conf
+declare -A _nb_loaded
+
+nb_get() {
+  echo ${_nb_conf[${1}]}
+}
+
+nb_set() {
+  _nb_conf[${1}]="${2}"
+}
+
+nb_is_loaded() {
+  [[ -n ${_nb_loaded[$1]} ]]
+}
+
+nb_set_loaded() {
+  _nb_loaded[$1]=1
+}
+

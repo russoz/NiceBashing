@@ -1,0 +1,18 @@
+NB_VAR_PREFIX="__nb"
+
+nb_get() {
+  eval "echo \$${NB_VAR_PREFIX}_$1"
+}
+
+nb_set() {
+  eval "export ${NB_VAR_PREFIX}_${1}=\"${2}\""
+}
+
+nb_is_loaded() {
+  [[ "$(nb_get loaded_${1/-/_})" -eq '1' ]]
+}
+
+nb_set_loaded() {
+  nb_set "loaded_${1/-/_}" 1
+}
+

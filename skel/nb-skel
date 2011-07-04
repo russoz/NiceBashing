@@ -1,6 +1,6 @@
 #!/bin/sh -e 'echo Do not run this >&2; exit 1'
 #
-# Alexei Znamensky <russoz@users.sf.net> 
+# Alexei Znamensky <russoz@cpan.org>
 #
 # Feel free to send suggestions, comments.
 #

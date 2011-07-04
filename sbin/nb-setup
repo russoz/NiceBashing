@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
-# Alexei Znamensky <russoz@user.sf.net>
+# Alexei Znamensky <russoz@cpan.org>
 #
 # Feel free to send suggestions, comments.
 #
 
 usage() {
   cat >&2 <<'EOM'
-usage: nb-setup [-h] [-r <remote-host>] [-d <dest>] 
+usage: nb-setup [-h] [-r <remote-host>] [-d <dest>]
 
 nb-setup installs the NB scripts
 
@@ -17,7 +17,7 @@ By default, it installs on ${HOME}/.nb, but you may specify any location.
     -d      Destination directory to install nb.
     -r      Remote host. It will install NB in that remote host, in ${HOME}/.nb
             or in the path specified by the -d option. You must have access
-            through ssh to that host. User names may be specified as in 
+            through ssh to that host. User names may be specified as in
             user@host, just like in ssh or scp.
     -y      Respond 'yes' to all questions.
 

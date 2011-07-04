@@ -1,8 +1,8 @@
 #!/bin/bash -e 'echo Do not run this >&2; exit 1'
 #
-# Alexei Znamensky <russoz@users.sf.net> 
+# Alexei Znamensky <russoz@cpan.org>
 #
-# Feel free to send suggestions, comments. Flames go to /dev/null.
+# Feel free to send suggestions, comments.
 #
 
 # functions here
@@ -24,7 +24,7 @@ remote-tail-file() {
 	local SERVER="$1"
 	local REMDIR="$2"
 	local FILE="$3"
-	
+
 	ssh ${SERVER} "tail -f ${REMDIR}/${FILE}"
 }
 

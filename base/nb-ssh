@@ -1,8 +1,8 @@
 #!/bin/bash -e 'echo Do not run this >&2; exit 1'
 #
-# Alexei Znamensky <russoz@users.sf.net>
+# Alexei Znamensky <russoz@cpan.org>
 #
-# Feel free to send suggestions, comments. Flames go to /dev/null.
+# Feel free to send suggestions, comments.
 #
 
 #
@@ -33,6 +33,8 @@ _ssh-load-agent() {
 _ssh-is-agent-dead() {
   ps -p "$1" | [[ $(egrep -c '(seahorse|ssh)-agent') == '0' ]] 2>/dev/null
 }
+
+bash-is-interactive && nb_is_true ssh_autoload_agent && _ssh-load-agent
 
 #
 # ssh-load-key
@@ -69,7 +71,7 @@ _ssh-get-user-host-args() {
 
   local OPTS='1246AaCfgKkMNnqsTtVvXxYb:c:D:e:F:i:L:l:m:O:o:p:R:S:w:'
   local opt
-	
+
   while getopts "$OPTS" opt; do
     [[ "$opt" == "l" ]] && l_flag="$OPTARG"
   done
@@ -141,7 +143,7 @@ ssh-setup-keys() {
 ssh() {
   local realssh
   realssh=$(nb_get ssh_real_ssh)
-  
+
   ssh-load-key
   if nb_is_true ssh_use_master; then
     host=$(_ssh-get-user-host-args "$@")
@@ -162,8 +164,6 @@ sftp() {
   ssh-load-key
   $(nb_get ssh_real_sftp) "$@"
 }
-
-bash-is-interactive && nb_is_true ssh_autoload_agent && _ssh-load-agent
 
 # Emacs config
 #
