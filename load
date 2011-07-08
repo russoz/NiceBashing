@@ -12,7 +12,7 @@
 # running on Bash.
 #
 
-[ -n "$PS1" ] && echo "Loading NB [`date`]" >&2
+[ -n "$PS1" ] && printf '%-48s %s\n' "Loading NiceBashing" "[`date`]" >&2
 
 #
 # BASH CHECK
