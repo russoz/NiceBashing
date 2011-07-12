@@ -1,0 +1,24 @@
+#!/bin/sh -e 'echo Do not run this >&2; exit 1'
+#
+# Alexei Znamensky <russoz@cpan.org>
+#
+# Feel free to send suggestions, comments.
+#
+
+nb_depends nb-bash nb-common || return 1
+
+# functions here
+
+export ZZOFF="$(nb_get zz_off)"
+export ZZPATH="$(nb_get zz_path)"
+set --
+. "${ZZPATH}"
+
+true
+
+# Emacs config
+#
+# Local Variables:
+# tab-width 2
+# sh-basic-offset 2
+# End:
