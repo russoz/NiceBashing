@@ -140,9 +140,42 @@ ssh-setup-keys() {
   fi
 }
 
-ssh() {
-  local realssh
-  realssh=$(nb_get ssh_real_ssh)
+#
+# ssh-make-alias
+#
+ssh-make-alias() {
+  local _s="$1"
+  local _a="$2"
+
+  [ -z "$_a" ] && _a=$(echo $_s|sed -e 's/\..*$//')
+  [ -z "$_a" ] && { echo "Cannot figure alias for $_s" >&2; continue; }
+
+  eval "alias $_a='ssh $_s'" || {
+    echo "Error making alias ($_b='ssh $_s')" >&2
+  }
+}
+
+ssh-make-foreach-func() {
+  local _n="$1"; shift
+
+  [ -n "$_n" ] || {
+    echo "usage: make_foreach_func <func-name> <host-list ...>" >&2
+    return 1
+  }
+
+  eval \
+    ${_n}'()' '{ for s in ' $@ '; do
+        echo "=========================== $s"
+        ssh "$s" "$@"
+      done
+    }' || { echo "Cannot define func ${_n}()!" >&2; return 1; }
+}
+
+#
+# ssh wrapper
+#
+ssh-wrapper() {
+  local realssh=$(nb_get ssh_real_ssh)
 
   ssh-load-key
   if nb_is_true ssh_use_master; then
@@ -154,16 +187,19 @@ ssh() {
     ${realssh} "$@"
   fi
 }
+alias ssh='ssh-wrapper'
 
-scp() {
+scp-wrapper() {
   ssh-load-key
   $(nb_get ssh_real_scp) "$@"
 }
+alias scp='scp-wrapper'
 
-sftp() {
+sftp-wrapper() {
   ssh-load-key
   $(nb_get ssh_real_sftp) "$@"
 }
+alias sftp='sftp-wrapper'
 
 # Emacs config
 #
