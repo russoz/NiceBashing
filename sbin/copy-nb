@@ -37,7 +37,7 @@ else
   rs=$(which rsync)
 fi
 rsync="$rs -rlptuCz -e \"$ssh\" "
-dirlist="base bin doc load load.var load.v3 load.v4 nbcore sbin skel"
+dirlist="base bin doc lib load load.var load.v3 load.v4 nbcore sbin skel"
 
 _copy() { (
   cd ${nbhome_src}
