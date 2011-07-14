@@ -269,6 +269,12 @@ nb_load_file() {
   }
 }
 
+_nb_load_msg() {
+  local mod="$1"
+  local lib="$2"
+  nb_vecho '  NB loading module:' "$(printf '%-12s | %s' ${mod##*/} $lib)"
+}
+
 #
 # nb_load_module
 #
@@ -276,13 +282,12 @@ nb_load_module() {
   local m=${1##*/}
   local lib=$(_nb_module_to_file $m)
   [[ -z "$lib" ]] && {
-    nb_vecho "Loading NB module: nb_load: Cannot find module ($1)"
+    _nb_load_msg "$m" "NOT_FOUND"
     return 1
   }
   nb_is_loaded $m  && return 0
-  nb_vecho -n 'Loading NB module: '
+  _nb_load_msg "$m" "$lib"
   nb_set_loaded $m
-  nb_vecho "$(printf '%15s from %s' ${m##*/} $lib)"
   nb_load_file "$lib"
 }
 
