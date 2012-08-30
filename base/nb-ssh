@@ -84,34 +84,12 @@ _ssh-get-user-host-args() {
   echo "$RES"
 }
 
-_ssh-is-master-running() {
-  [[ -z "$1" ]] && return 1
-  $(nb_get ssh_real_ssh) -O check -S "$(nb_get ssh_ctl_path)" "$@" 2>&1 |
-    grep -q "Master running"
-}
-
-_ssh-create-master() {
-  _ssh-is-master-running "$@" && return 0
-  $(nb_get ssh_real_ssh) -MNf -S "$(nb_get ssh_ctl_path)" "$@"
-}
-
 _ssh-copy-key() {
   echo "Installing the key at $1:\$HOME/.ssh/authorized_keys "
   cat $nb_ssh_pubkey \
     | $(nb_get ssh_real_ssh) "$1" \
         "umask 077; mkdir -p .ssh ; cat >> .ssh/authorized_keys" \
 	      || return 1
-}
-
-ssh-clean-master-sockets() {
-  local h
-	local p
-  h="$1"
-  [[ -z "$h" ]] && h='\*'
-  p=$(nb_get ssh_ctl_path)
-  p=${p/\%r/\\\*}
-  p=${p/\%h/$h}
-  rm ${p}
 }
 
 _ssh-test-connection() {
@@ -175,17 +153,8 @@ ssh-make-foreach-func() {
 # ssh wrapper
 #
 ssh-wrapper() {
-  local realssh=$(nb_get ssh_real_ssh)
-
   ssh-load-key
-  if nb_is_true ssh_use_master; then
-    host=$(_ssh-get-user-host-args "$@")
-    _ssh-create-master $host
-
-    ${realssh} -S "$(nb_get ssh_ctl_path)" "$@"
-  else
-    ${realssh} "$@"
-  fi
+  $(nb_get ssh_real_ssh) "$@"
 }
 alias ssh='ssh-wrapper'
 
