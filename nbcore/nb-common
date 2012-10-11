@@ -5,11 +5,12 @@
 # Feel free to send suggestions, comments.
 #
 
-#
-# usage
-#
-usage() {
-	echo "usage:" "$@" >&2
+msg()   { echo "$@" >&2; }
+die()   { msg "$@"; exit 1; }
+usage() { msg "usage:" "$@"; }
+
+load_if_exists() {
+	[[ -r "$1" ]] && source "$1"
 }
 
 #
